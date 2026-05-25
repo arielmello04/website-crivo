@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crivo & Co. — Estúdio criativo. Marcas que passam pelo crivo.</title>
+<meta name="description" content="Crivo & Co. é um estúdio criativo digital. Branding, conteúdo, mídia e performance — com critério." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ TOKENS — PALETA EDITORIAL ============ */
+  :root {
+    --bg:        #f5f1ea;   /* off-white quente / cream */
+    --bg-2:      #ece6db;   /* cream um tom abaixo */
+    --bg-3:      #e2dbcc;   /* cream mais escuro */
+    --ink:       #1a1614;   /* preto quente / quase café */
+    --ink-dim:   #4a4540;   /* cinza-quente médio */
+    --ink-mute:  #8a847b;   /* cinza-quente claro */
+    --line:      #d4ccbe;   /* linha cream escura */
+    --line-2:    #e0d8c9;   /* linha sutil */
+    --accent:    #c54a1a;   /* laranja queimado */
+    --accent-2:  #d85f30;   /* laranja claro */
+    --warn:      #8b1e1e;
+
+    --serif:     'Fraunces', 'Times New Roman', serif;
+    --sans:      'Inter', system-ui, sans-serif;
+    --mono:      'JetBrains Mono', 'Courier New', monospace;
+
+    --maxw:      1440px;
+    --pad:       clamp(20px, 4vw, 64px);
+  }
+
+  /* ============ BASE ============ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    cursor: default;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; color: inherit; }
+
+  /* grain overlay — mais sutil pra tema claro */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  /* ============ NAV ============ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 20px var(--pad);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+    background: rgba(245, 241, 234, 0.8);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 28px; height: 28px;
+    position: relative;
+    display: inline-block;
+  }
+  .logo-mark svg { width: 100%; height: 100%; }
+  .logo-amp {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    position: relative;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+    transition: all 0.25s;
+  }
+  .nav-cta:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    min-height: 100vh;
+    padding: 140px var(--pad) 80px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  /* sieve / mesh background */
+  .hero-mesh {
+    position: absolute;
+    top: 0; right: 0;
+    width: 60%; height: 100%;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+  .hero-mesh svg {
+    width: 100%; height: 100%;
+    transform: rotate(-12deg) scale(1.4);
+    transform-origin: center;
+  }
+
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    margin-bottom: 60px;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-top span:first-child::before {
+    content: '◉';
+    color: var(--accent);
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(48px, 9vw, 156px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+  }
+  .hero-title .italic {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .hero-title .strike {
+    position: relative;
+    color: var(--ink-mute);
+  }
+  .hero-title .strike::after {
+    content: '';
+    position: absolute;
+    left: -2%; right: -2%;
+    top: 52%;
+    height: 2px;
+    background: var(--ink-mute);
+    transform: rotate(-3deg);
+  }
+
+  .hero-bottom {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 60px;
+    margin-top: 80px;
+    align-items: end;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-lede {
+    max-width: 420px;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+  }
+  .hero-lede strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .hero-cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 28px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    border-radius: 100px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+  .btn-primary svg {
+    width: 16px; height: 16px;
+    transition: transform 0.3s;
+  }
+  .btn-primary:hover svg { transform: translate(3px, -3px); }
+
+  .hero-meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    line-height: 1.8;
+  }
+  .hero-meta strong { color: var(--ink); font-weight: 400; }
+
+  @media (max-width: 900px) {
+    .hero-bottom { grid-template-columns: 1fr; gap: 32px; }
+    .hero-meta { text-align: left; }
+    .hero-mesh { width: 100%; opacity: 0.3; }
+  }
+
+  /* ============ MARQUEE ============ */
+  .marquee {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+    overflow: hidden;
+    padding: 18px 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 60px;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-dim);
+  }
+  .marquee-track span { display: flex; align-items: center; gap: 60px; }
+  .marquee-track span::after {
+    content: '✦';
+    color: var(--accent);
+    font-style: normal;
+    font-size: 14px;
+  }
+  @keyframes scroll {
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============ SECTION SHARED ============ */
+  section { position: relative; }
+  .section-pad {
+    padding: 120px var(--pad);
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .section-label::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(40px, 6vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 48px;
+  }
+  .section-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* ============ SOBRE ============ */
+  .sobre {
+    border-top: 1px solid var(--line);
+  }
+  .sobre-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .sobre-text {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+  .sobre-text p { margin-bottom: 24px; }
+  .sobre-text p:first-child {
+    font-family: var(--serif);
+    font-size: 28px;
+    line-height: 1.35;
+    color: var(--ink);
+    font-weight: 300;
+  }
+  .sobre-text p:first-child::first-letter {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.2em;
+    color: var(--accent);
+  }
+  .sobre-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .stat {
+    background: var(--bg);
+    padding: 32px 24px;
+  }
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+  }
+  .stat-num sup {
+    font-size: 18px;
+    color: var(--accent);
+    margin-left: 4px;
+    vertical-align: top;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    margin-top: 12px;
+  }
+  @media (max-width: 900px) {
+    .sobre-grid { grid-template-columns: 1fr; gap: 48px; }
+  }
+
+  /* ============ MVV (a "parede") ============ */
+  .mvv {
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  /* faux wall texture — linhas claras */
+  .mvv::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 200px, rgba(26, 22, 20, 0.025) 200px 201px),
+      repeating-linear-gradient(0deg, transparent 0 200px, rgba(26, 22, 20, 0.025) 200px 201px);
+    pointer-events: none;
+  }
+  .mvv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 80px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .mvv-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    text-align: right;
+    line-height: 1.8;
+  }
+  .mvv-meta strong { color: var(--accent); font-weight: 400; }
+
+  .mvv-frames {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    position: relative;
+  }
+  .frame {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 40px 36px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .frame:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 20px 40px rgba(26, 22, 20, 0.08);
+  }
+  .frame:hover .frame-num { color: var(--accent); }
+  .frame:nth-child(2) { transform: translateY(20px); }
+  .frame:nth-child(2):hover { transform: translateY(14px); }
+
+  /* canto superior — "prego na parede" */
+  .frame::before {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 8px;
+    background: var(--ink);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--bg-2);
+  }
+
+  .frame-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    margin-bottom: 24px;
+    transition: color 0.3s;
+  }
+  .frame-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-mute);
+    margin-bottom: 12px;
+  }
+  .frame-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+  .frame-body {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+  .frame-tag {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+  }
+  .frame-tag span { color: var(--ink-dim); }
+  @media (max-width: 900px) {
+    .mvv-frames { grid-template-columns: 1fr; }
+    .frame:nth-child(2) { transform: none; }
+    .frame:nth-child(2):hover { transform: translateY(-6px); }
+  }
+
+  /* ============ SERVIÇOS ============ */
+  .servicos {
+    border-top: 1px solid var(--line);
+  }
+  .servicos-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 60px;
+    align-items: end;
+    margin-bottom: 64px;
+  }
+  .servicos-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+  .servicos-list {
+    border-top: 1px solid var(--ink);
+  }
+  .servico-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 2fr 60px;
+    gap: 32px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+  .servico-row::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(197, 74, 26, 0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .servico-row:hover::before { opacity: 1; }
+  .servico-row:hover .servico-arrow { transform: translate(8px, -8px); color: var(--accent); }
+  .servico-row:hover .servico-name { color: var(--accent); }
+
+  .servico-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+  }
+  .servico-name {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .servico-name em {
+    font-style: italic;
+    font-weight: 300;
+  }
+  .servico-desc {
+    font-size: 15px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  .servico-arrow {
+    color: var(--ink-mute);
+    transition: all 0.3s;
+    text-align: right;
+    font-size: 20px;
+  }
+  @media (max-width: 768px) {
+    .servico-row { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+    .servico-arrow { display: none; }
+    .servicos-header { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  /* ============ CONTATO ============ */
+  .contato {
+    border-top: 1px solid var(--line);
+    background:
+      radial-gradient(ellipse at top right, rgba(197, 74, 26, 0.06), transparent 60%),
+      var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .contato-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .contato-aside h2 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+  .contato-aside h2 em { font-style: italic; color: var(--accent); }
+  .contato-aside p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin-bottom: 40px;
+    max-width: 380px;
+  }
+  .contato-info {
+    border-top: 1px solid var(--line);
+    padding-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .contato-info-item {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+  .contato-info-item span:first-child {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+  }
+  .contato-info-item span:last-child { color: var(--ink); }
+
+  /* form */
+  .form {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    padding: 48px 40px;
+    position: relative;
+  }
+  .form::before {
+    content: 'BRIEFING.001';
+    position: absolute;
+    top: -8px; left: 32px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .form-label::before {
+    content: '→';
+    color: var(--accent);
+    font-size: 12px;
+  }
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.3s;
+    font-family: var(--sans);
+  }
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--ink-mute);
+  }
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a4540' stroke-width='1.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 18px;
+    padding-right: 24px;
+  }
+  .form-select option { background: var(--bg-2); color: var(--ink); }
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: var(--sans);
+  }
+
+  .form-submit {
+    margin-top: 36px;
+    width: 100%;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 22px;
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    border-radius: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .form-submit:hover {
+    background: var(--accent);
+  }
+  .form-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .form-foot {
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    text-align: center;
+  }
+
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .form-success.show { display: block; }
+  .form-success-icon {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 80px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .form-success-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .form-success-text {
+    color: var(--ink-dim);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 900px) {
+    .contato-grid { grid-template-columns: 1fr; gap: 56px; }
+    .form-row { grid-template-columns: 1fr; }
+    .form { padding: 40px 24px; }
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    padding: 60px var(--pad) 32px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .footer-big {
+    font-family: var(--serif);
+    font-size: clamp(48px, 10vw, 140px);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+  .footer-big em { font-style: italic; color: var(--accent); }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* ============ REVEAL ANIMATIONS ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-stagger.in > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0s; }
+  .reveal-stagger.in > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.12s; }
+  .reveal-stagger.in > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.24s; }
+  .reveal-stagger.in > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.36s; }
+  .reveal-stagger.in > *:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.48s; }
+
+  /* hero entrance */
+  .hero-title, .hero-lede, .hero-cta-group, .hero-meta, .hero-top {
+    opacity: 0;
+    animation: heroIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .hero-top { animation-delay: 0.1s; }
+  .hero-title { animation-delay: 0.3s; }
+  .hero-lede { animation-delay: 0.7s; }
+  .hero-cta-group { animation-delay: 0.85s; }
+  .hero-meta { animation-delay: 0.95s; }
+  @keyframes heroIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <a href="#" class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1"/>
+        <circle cx="16" cy="16" r="3" fill="#c54a1a"/>
+        <line x1="2" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="0.5"/>
+        <line x1="16" y1="2" x2="16" y2="30" stroke="currentColor" stroke-width="0.5"/>
+        <line x1="6" y1="6" x2="26" y2="26" stroke="currentColor" stroke-width="0.5"/>
+        <line x1="26" y1="6" x2="6" y2="26" stroke="currentColor" stroke-width="0.5"/>
+      </svg>
+    </span>
+    Crivo<span class="logo-amp">&</span>Co.
+  </a>
+  <div class="nav-links">
+    <a href="#sobre">Sobre</a>
+    <a href="#manifesto">Manifesto</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#contato">Contato</a>
+  </div>
+  <a href="#contato" class="nav-cta">Fale com a gente</a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <!-- malha / crivo decorativo -->
+  <div class="hero-mesh" aria-hidden="true">
+    <svg viewBox="0 0 600 600" fill="none">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <circle cx="20" cy="20" r="1.5" fill="#c54a1a" opacity="0.5"/>
+          <line x1="0" y1="20" x2="40" y2="20" stroke="#c54a1a" stroke-width="0.3" opacity="0.25"/>
+          <line x1="20" y1="0" x2="20" y2="40" stroke="#c54a1a" stroke-width="0.3" opacity="0.25"/>
+        </pattern>
+        <radialGradient id="fade" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="white" stop-opacity="1"/>
+          <stop offset="100%" stop-color="white" stop-opacity="0"/>
+        </radialGradient>
+        <mask id="m"><rect width="100%" height="100%" fill="url(#fade)"/></mask>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" mask="url(#m)"/>
+    </svg>
+  </div>
+
+  <div class="hero-top">
+    <span>Live · Estúdio criativo · 2026</span>
+    <span>BR · Camaçari → Mundo</span>
+  </div>
+
+  <h1 class="hero-title">
+    Marcas que<br>
+    <span class="strike">só fazem barulho.</span><br>
+    <span class="italic">passam pelo crivo.</span>
+  </h1>
+
+  <div class="hero-bottom">
+    <p class="hero-lede">
+      Somos um estúdio criativo digital. <strong>Branding, conteúdo, mídia e performance</strong> — criados com critério, entregues com método. Não fazemos tudo. Fazemos o que faz sentido pra sua marca crescer.
+    </p>
+    <div class="hero-cta-group">
+      <a href="#contato" class="btn-primary">
+        Começar um projeto
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="7" y1="17" x2="17" y2="7"/>
+          <polyline points="7 7 17 7 17 17"/>
+        </svg>
+      </a>
+    </div>
+    <div class="hero-meta">
+      <div>Edição <strong>01.26</strong></div>
+      <div>Sede <strong>Bahia, Brasil</strong></div>
+      <div>Status <strong style="color: var(--accent);">Aceitando briefings</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Branding</span><span>Identidade visual</span><span>Conteúdo</span><span>Performance</span><span>Mídia paga</span><span>Estratégia digital</span><span>Redes sociais</span><span>Sites & landing pages</span>
+    <span>Branding</span><span>Identidade visual</span><span>Conteúdo</span><span>Performance</span><span>Mídia paga</span><span>Estratégia digital</span><span>Redes sociais</span><span>Sites & landing pages</span>
+  </div>
+</div>
+
+<!-- ============ SOBRE ============ -->
+<section class="sobre" id="sobre">
+  <div class="section-pad">
+    <div class="section-label reveal">[ 01 / Sobre ]</div>
+    <h2 class="section-title reveal">A gente filtra<br>antes de <em>publicar.</em></h2>
+
+    <div class="sobre-grid">
+      <div class="sobre-text reveal">
+        <p>Crivo nasceu de um incômodo: o digital virou um lugar barulhento, cheio de marca falando alto e dizendo pouco. A gente acredita no contrário — menos volume, mais critério.</p>
+        <p>Trabalhamos como editor trabalha um texto: cortamos o que não precisa estar ali. Cada peça, cada campanha, cada palavra passa pelo nosso filtro antes de chegar no público. É isso que separa marca que comunica de marca que só ocupa espaço.</p>
+        <p>Atendemos quem leva o próprio negócio a sério — empresas que querem construir presença com substância, não com fórmula pronta.</p>
+      </div>
+      <div class="sobre-stats reveal">
+        <div class="stat">
+          <div class="stat-num">4<sup>+</sup></div>
+          <div class="stat-label">Áreas de atuação</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">100<sup>%</sup></div>
+          <div class="stat-label">Projetos customizados</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Possibilidades</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">01</div>
+          <div class="stat-label">Critério inegociável</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MVV — A PAREDE ============ -->
+<section class="mvv" id="manifesto">
+  <div class="section-pad">
+    <div class="mvv-header">
+      <div>
+        <div class="section-label reveal">[ 02 / Manifesto ]</div>
+        <h2 class="section-title reveal">A parede<br>do nosso <em>estúdio.</em></h2>
+      </div>
+      <div class="mvv-meta reveal">
+        <div>Documento interno · v1.0</div>
+        <div>Atualizado <strong>2026</strong></div>
+        <div>Vigência <strong>permanente</strong></div>
+      </div>
+    </div>
+
+    <div class="mvv-frames reveal-stagger">
+      <article class="frame">
+        <div class="frame-num">FRAME · 01</div>
+        <div class="frame-label">Missão</div>
+        <h3 class="frame-title">O quê.</h3>
+        <p class="frame-body">
+          Dar voz, forma e direção às marcas que querem ser ouvidas com respeito. Traduzir a essência de cada negócio em comunicação que move pessoas — e move o ponteiro.
+        </p>
+        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
+      </article>
+
+      <article class="frame">
+        <div class="frame-num">FRAME · 02</div>
+        <div class="frame-label">Visão</div>
+        <h3 class="frame-title">Onde.</h3>
+        <p class="frame-body">
+          Ser referência em criação digital com critério no Brasil — o estúdio escolhido por marcas que entendem que substância vale mais que ruído. Crescer junto com cada cliente, sem perder o filtro.
+        </p>
+        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
+      </article>
+
+      <article class="frame">
+        <div class="frame-num">FRAME · 03</div>
+        <div class="frame-label">Valores</div>
+        <h3 class="frame-title">Como.</h3>
+        <p class="frame-body">
+          <strong style="color:var(--ink);">Critério</strong> antes de criar.<br>
+          <strong style="color:var(--ink);">Verdade</strong> antes de estilo.<br>
+          <strong style="color:var(--ink);">Estratégia</strong> antes de execução.<br>
+          <strong style="color:var(--ink);">Respeito</strong> ao cliente, ao público, ao tempo.
+        </p>
+        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVIÇOS ============ -->
+<section class="servicos" id="servicos">
+  <div class="section-pad">
+    <div class="section-label reveal">[ 03 / Serviços ]</div>
+    <div class="servicos-header">
+      <h2 class="section-title reveal" style="margin-bottom:0;">O que fazemos<br>quando dizemos <em>sim.</em></h2>
+      <p class="servicos-sub reveal">Quatro frentes que conversam entre si. Você pode contratar uma, todas, ou desenhar o pacote que faz sentido.</p>
+    </div>
+
+    <div class="servicos-list reveal-stagger">
+      <div class="servico-row">
+        <div class="servico-num">01 / BRD</div>
+        <div class="servico-name">Branding<em> & identidade</em></div>
+        <div class="servico-desc">Do nome ao manual de marca. Posicionamento, naming, identidade visual, tom de voz. A base de tudo.</div>
+        <div class="servico-arrow">↗</div>
+      </div>
+      <div class="servico-row">
+        <div class="servico-num">02 / CNT</div>
+        <div class="servico-name">Conteúdo<em> & social</em></div>
+        <div class="servico-desc">Estratégia de redes, calendário editorial, produção de conteúdo, gestão de comunidade. Presença que conversa.</div>
+        <div class="servico-arrow">↗</div>
+      </div>
+      <div class="servico-row">
+        <div class="servico-num">03 / MID</div>
+        <div class="servico-name">Mídia<em> & performance</em></div>
+        <div class="servico-desc">Tráfego pago em Meta, Google e TikTok. Funis, conversão, ROAS. Quando o objetivo é resultado mensurável.</div>
+        <div class="servico-arrow">↗</div>
+      </div>
+      <div class="servico-row">
+        <div class="servico-num">04 / WEB</div>
+        <div class="servico-name">Sites<em> & landing pages</em></div>
+        <div class="servico-desc">Páginas e sites que vendem, captam ou apresentam. Design autoral, código limpo, performance real.</div>
+        <div class="servico-arrow">↗</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTATO ============ -->
+<section class="contato" id="contato">
+  <div class="section-pad">
+    <div class="section-label reveal">[ 04 / Contato ]</div>
+
+    <div class="contato-grid">
+      <div class="contato-aside reveal">
+        <h2>Conta pra<br>gente o <em>projeto.</em></h2>
+        <p>Preenche o briefing ao lado e a gente entra em contato em até 48h úteis. Sem script, sem proposta enlatada — uma conversa real.</p>
+
+        <div class="contato-info">
+          <div class="contato-info-item">
+            <span>Email</span>
+            <span>contato@crivoco.com.br</span>
+          </div>
+          <div class="contato-info-item">
+            <span>WhatsApp</span>
+            <span>(71) 9 9913-1244</span>
+          </div>
+          <div class="contato-info-item">
+            <span>Localização</span>
+            <span>Camaçari, BA</span>
+          </div>
+          <div class="contato-info-item">
+            <span>Resposta</span>
+            <span style="color: var(--accent);">Até 48h úteis</span>
+          </div>
+        </div>
+      </div>
+
+      <form class="form reveal" id="briefingForm" onsubmit="return handleSubmit(event)">
+        <!-- honeypot anti-spam: invisível pra humano, bot preenche -->
+        <input type="text" name="website" tabindex="-1" autocomplete="off"
+               style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;" aria-hidden="true">
+
+        <div id="formFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="nome">Seu nome</label>
+              <input type="text" id="nome" name="nome" class="form-input" placeholder="Como você quer ser chamado(a)" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="empresa">Empresa</label>
+              <input type="text" id="empresa" name="empresa" class="form-input" placeholder="Nome da sua marca / negócio" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" id="email" name="email" class="form-input" placeholder="voce@empresa.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="telefone">Telefone / WhatsApp</label>
+              <input type="tel" id="telefone" name="telefone" class="form-input" placeholder="(71) 9 9999-9999" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label" for="servico">O que você precisa?</label>
+              <select id="servico" name="servico" class="form-select" required>
+                <option value="">Selecione um serviço</option>
+                <option value="branding">Branding & identidade</option>
+                <option value="conteudo">Conteúdo & redes sociais</option>
+                <option value="midia">Mídia & performance</option>
+                <option value="web">Site / landing page</option>
+                <option value="combo">Combo (mais de um serviço)</option>
+                <option value="naosei">Ainda não sei — quero conversar</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label" for="mensagem">Conta um pouco do projeto</label>
+              <textarea id="mensagem" name="mensagem" class="form-textarea" placeholder="O que você quer resolver? Tem prazo? Tem referências? Quanto mais contexto, melhor a gente responde." required></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="form-submit" id="submitBtn">
+            <span>Enviar briefing</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+          <div class="form-foot">Resposta em até 48h úteis · Seus dados ficam só com a gente</div>
+        </div>
+
+        <div class="form-success" id="formSuccess">
+          <div class="form-success-icon">✓</div>
+          <div class="form-success-title">Briefing recebido.</div>
+          <div class="form-success-text">A gente lê com calma e responde em até 48h úteis no email informado. Obrigado pela confiança.</div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-big">Crivo<em>&</em>Co.</div>
+    <div style="font-family: var(--mono); font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.8; text-align: right;">
+      <div>Estúdio criativo digital</div>
+      <div>Branding · Conteúdo · Mídia · Web</div>
+      <div style="color: var(--accent);">passou no crivo, comunica</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Crivo & Co. · Todos os direitos reservados</div>
+    <div>Feito em Camaçari, BA · Brasil</div>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -80px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+
+  // ============ CONFIGURAÇÃO DA API ============
+  // Troque pela URL do seu backend no Railway antes de subir pra produção.
+  // Exemplo: 'https://crivo-backend-production.up.railway.app/api/briefings'
+  const API_ENDPOINT = 'https://SEU-BACKEND.up.railway.app/api/briefings';
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Enviando...';
+
+    const form = document.getElementById('briefingForm');
+    const data = Object.fromEntries(new FormData(form));
+
+    fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then(async (res) => {
+        const body = await res.json();
+        if (!res.ok || !body.ok) {
+          // se for erro de validação, mostra a primeira mensagem específica
+          const msg = body.issues?.[0]?.message || body.error || 'Erro ao enviar';
+          throw new Error(msg);
+        }
+        document.getElementById('formFields').style.display = 'none';
+        document.getElementById('formSuccess').classList.add('show');
+      })
+      .catch((err) => {
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Enviar briefing';
+        alert('Não foi possível enviar agora.\n\n' + err.message + '\n\nTenta de novo em alguns instantes ou nos chama no WhatsApp.');
+      });
+
+    return false;
+  }
+
+</script>
+
+</body>
+</html>

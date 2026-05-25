@@ -1,0 +1,18 @@
+# backend
+backend/node_modules/
+backend/.env
+backend/data/
+backend/*.db
+backend/*.db-journal
+backend/*.db-wal
+backend/*.db-shm
+
+# pasta legada (pode apagar depois de confirmar que backend/ está ok)
+crivo-backend/
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# claude code
+.claude/
