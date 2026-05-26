@@ -1,31 +1,47 @@
-import nodemailer from 'nodemailer';
 import { getServicoLabel } from './validation.js';
 
+const apiKey = process.env.BREVO_API_KEY;
 const enabled = process.env.EMAIL_ENABLED !== 'false';
+const notifyTo = process.env.EMAIL_NOTIFY;
 
-let transporter = null;
+// parseia "Crivo & Co. <email@gmail.com>" → { name, email }
+const fromRaw = process.env.EMAIL_FROM || 'Crivo & Co. <crivoeco@gmail.com>';
+const fromMatch = fromRaw.match(/^"?([^"<]+)"?\s*<([^>]+)>$/);
+const fromName = fromMatch ? fromMatch[1].trim() : 'Crivo & Co.';
+const fromEmail = fromMatch ? fromMatch[2].trim() : fromRaw;
 
-if (enabled) {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  // verifica a conexão na inicialização — falha cedo se SMTP estiver errado
-  transporter.verify()
-    .then(() => console.log('[email] SMTP conectado'))
-    .catch((err) => console.error('[email] Falha SMTP:', err.message));
+if (enabled && !apiKey) {
+  console.warn('[email] BREVO_API_KEY não definida — envio desabilitado');
+} else if (enabled) {
+  console.log(`[email] Brevo API pronta (from: ${fromEmail})`);
 } else {
   console.log('[email] Envio desabilitado (EMAIL_ENABLED=false)');
 }
 
-const from = process.env.EMAIL_FROM || 'Crivo & Co. <noreply@crivoco.com.br>';
-const notifyTo = process.env.EMAIL_NOTIFY;
+async function sendEmail({ to, toName, replyTo, subject, html, text }) {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: { name: fromName, email: fromEmail },
+      to: [{ email: to, name: toName || to }],
+      ...(replyTo && { replyTo: { email: replyTo } }),
+      subject,
+      htmlContent: html,
+      textContent: text,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Brevo API ${res.status}: ${err.message || res.statusText}`);
+  }
+
+  return res.json();
+}
 
 // escapa HTML pra evitar injeção no template
 function esc(s) {
@@ -37,7 +53,6 @@ function esc(s) {
     .replace(/'/g, '&#39;');
 }
 
-// === email de notificação interna (vai pra você) ===
 function buildInternalEmail(b) {
   const html = `<!DOCTYPE html>
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f1ea;color:#1a1614;margin:0;padding:32px;">
@@ -74,7 +89,6 @@ function buildInternalEmail(b) {
   return { html, text };
 }
 
-// === auto-resposta pro cliente ===
 function buildClientEmail(b) {
   const html = `<!DOCTYPE html>
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f1ea;color:#1a1614;margin:0;padding:32px;">
@@ -102,28 +116,29 @@ function buildClientEmail(b) {
   return { html, text };
 }
 
-// === API pública ===
 export async function notifyNewBriefing(briefing) {
-  if (!enabled || !transporter) {
+  if (!enabled || !apiKey) {
     console.log(`[email] (desabilitado) seria enviado: briefing #${briefing.id}`);
     return { ok: true, skipped: true };
   }
 
+  const { html: htmlInterno, text: textInterno } = buildInternalEmail(briefing);
+  const { html: htmlCliente, text: textCliente } = buildClientEmail(briefing);
+
   const results = await Promise.allSettled([
-    // 1. notificação interna
-    transporter.sendMail({
-      from,
+    sendEmail({
       to: notifyTo,
       replyTo: briefing.email,
       subject: `[Crivo] Novo briefing — ${briefing.empresa}`,
-      ...buildInternalEmail(briefing),
+      html: htmlInterno,
+      text: textInterno,
     }),
-    // 2. auto-resposta pro cliente
-    transporter.sendMail({
-      from,
+    sendEmail({
       to: briefing.email,
+      toName: briefing.nome,
       subject: 'Recebemos seu briefing — Crivo & Co.',
-      ...buildClientEmail(briefing),
+      html: htmlCliente,
+      text: textCliente,
     }),
   ]);
 
@@ -132,7 +147,7 @@ export async function notifyNewBriefing(briefing) {
     if (r.status === 'rejected') {
       console.error(`[email] Falha no envio (${label}):`, r.reason?.message);
     } else {
-      console.log(`[email] Enviado (${label}): ${r.value.messageId}`);
+      console.log(`[email] Enviado (${label}): ${r.value.messageId || 'ok'}`);
     }
   });
 
