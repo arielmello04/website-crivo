@@ -770,6 +770,25 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+  .input-invalid {
+    border-color: var(--warn) !important;
+    animation: shake .35s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(-6px); }
+    75%       { transform: translateX(6px); }
+  }
+  .field-msg {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--warn);
+    letter-spacing: .05em;
+    margin-top: 6px;
+    display: none;
+  }
+  .field-msg.show { display: block; }
+
   .form-foot {
     margin-top: 20px;
     font-family: var(--mono);
@@ -1103,7 +1122,7 @@
         <div class="contato-info">
           <div class="contato-info-item">
             <span>Email</span>
-            <span>contato@crivoco.com.br</span>
+            <span>crivoeco@gmail.com</span>
           </div>
           <div class="contato-info-item">
             <span>WhatsApp</span>
@@ -1141,6 +1160,7 @@
             <div class="form-group">
               <label class="form-label" for="email">Email</label>
               <input type="email" id="email" name="email" class="form-input" placeholder="voce@empresa.com" required>
+              <span class="field-msg" id="emailMsg">Informe um email válido com @</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="telefone">Telefone / WhatsApp</label>
@@ -1160,6 +1180,7 @@
                 <option value="combo">Combo (mais de um serviço)</option>
                 <option value="naosei">Ainda não sei, quero conversar</option>
               </select>
+              <span class="field-msg" id="servicoMsg">Selecione pelo menos um serviço</span>
             </div>
           </div>
 
@@ -1223,8 +1244,32 @@
   // Exemplo: 'https://crivo-backend-production.up.railway.app/api/briefings'
   const API_ENDPOINT = 'https://website-crivo-production.up.railway.app/api/briefings';
 
+  function markInvalid(el, msgId) {
+    el.classList.add('input-invalid');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.focus();
+    if (msgId) document.getElementById(msgId).classList.add('show');
+    setTimeout(() => {
+      el.classList.remove('input-invalid');
+      if (msgId) document.getElementById(msgId).classList.remove('show');
+    }, 3000);
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
+
+    const emailEl   = document.getElementById('email');
+    const servicoEl = document.getElementById('servico');
+
+    if (!emailEl.value.trim().includes('@')) {
+      markInvalid(emailEl, 'emailMsg');
+      return false;
+    }
+    if (!servicoEl.value) {
+      markInvalid(servicoEl, 'servicoMsg');
+      return false;
+    }
+
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.querySelector('span').textContent = 'Enviando...';
