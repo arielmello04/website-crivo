@@ -117,15 +117,11 @@ app.post('/api/briefings', briefingLimiter, async (req, res) => {
   }
 });
 
-// === GET /api/briefings — listagem (você pode proteger com auth depois) ===
-// Útil pra você consultar os leads via curl/painel.
+// === GET /api/briefings — listagem protegida ===
 app.get('/api/briefings', (req, res) => {
-  // proteção simples por token via header — opcional, ativa só se ADMIN_TOKEN estiver setado
   const adminToken = process.env.ADMIN_TOKEN;
-  if (adminToken) {
-    if (req.get('x-admin-token') !== adminToken) {
-      return res.status(401).json({ ok: false, error: 'Não autorizado' });
-    }
+  if (!adminToken || req.get('x-admin-token') !== adminToken) {
+    return res.status(401).json({ ok: false, error: 'Não autorizado' });
   }
 
   const limit = Math.min(Number(req.query.limit) || 20, 100);
@@ -135,10 +131,10 @@ app.get('/api/briefings', (req, res) => {
   res.json({ ok: true, ...result, limit, offset });
 });
 
-// === GET /api/briefings/:id — detalhe ===
+// === GET /api/briefings/:id — detalhe protegido ===
 app.get('/api/briefings/:id', (req, res) => {
   const adminToken = process.env.ADMIN_TOKEN;
-  if (adminToken && req.get('x-admin-token') !== adminToken) {
+  if (!adminToken || req.get('x-admin-token') !== adminToken) {
     return res.status(401).json({ ok: false, error: 'Não autorizado' });
   }
 
@@ -211,4 +207,14 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`[server] Crivo backend rodando em http://localhost:${port}`);
   console.log(`[server] CORS permitido: ${allowedOrigins.join(', ') || '(nenhum — atenção)'}`);
+
+  if (!process.env.TOKEN_SECRET) {
+    console.warn('[AVISO] TOKEN_SECRET não definido — tokens estão sendo assinados com valor padrão inseguro. Configure no Railway.');
+  }
+  if (!process.env.ADMIN_TOKEN) {
+    console.warn('[AVISO] ADMIN_TOKEN não definido — GET /api/briefings retornará 401 para todos.');
+  }
+  if (!process.env.ADMIN_SECRET) {
+    console.warn('[AVISO] ADMIN_SECRET não definido — geração de links de questionário está desabilitada.');
+  }
 });
