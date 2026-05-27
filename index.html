@@ -695,7 +695,6 @@
     font-size: 12px;
   }
   .form-input,
-  .form-select,
   .form-textarea {
     background: transparent;
     border: none;
@@ -708,7 +707,6 @@
     font-family: var(--sans);
   }
   .form-input:focus,
-  .form-select:focus,
   .form-textarea:focus {
     border-color: var(--accent);
   }
@@ -718,11 +716,27 @@
   }
   .form-select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a4540' stroke-width='1.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    cursor: pointer;
+    width: 100%;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    padding: 14px 44px 14px 16px;
+    font-size: 15px;
+    font-family: var(--sans);
+    color: var(--ink);
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.3s, background 0.3s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a847b' stroke-width='1.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right center;
+    background-position: right 14px center;
     background-size: 18px;
-    padding-right: 24px;
+  }
+  .form-select:required:invalid { color: var(--ink-mute); }
+  .form-select:focus {
+    border-color: var(--accent);
+    background-color: var(--bg-2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c54a1a' stroke-width='1.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   }
   .form-select option { background: var(--bg-2); color: var(--ink); }
   .form-textarea {
@@ -919,8 +933,7 @@
   </div>
 
   <div class="hero-top">
-    <span>Live · Estúdio criativo · 2026</span>
-    <span>BR · Camaçari → Mundo</span>
+    <span>Estúdio criativo</span>
   </div>
 
   <h1 class="hero-title">
@@ -931,7 +944,7 @@
 
   <div class="hero-bottom">
     <p class="hero-lede">
-      Somos um estúdio criativo digital. <strong>Branding, conteúdo, mídia e performance</strong> — criados com critério, entregues com método. Não fazemos tudo. Fazemos o que faz sentido pra sua marca crescer.
+      Somos um estúdio criativo digital. <strong>Branding, conteúdo, mídia e performance</strong> criados com critério, entregues com método. Não fazemos tudo. Fazemos o que faz sentido pra sua marca crescer.
     </p>
     <div class="hero-cta-group">
       <a href="#contato" class="btn-primary">
@@ -943,7 +956,6 @@
       </a>
     </div>
     <div class="hero-meta">
-      <div>Edição <strong>01.26</strong></div>
       <div>Sede <strong>Bahia, Brasil</strong></div>
       <div>Status <strong style="color: var(--accent);">Aceitando briefings</strong></div>
     </div>
@@ -1002,7 +1014,6 @@
       </div>
       <div class="mvv-meta reveal">
         <div>Documento interno · v1.0</div>
-        <div>Atualizado <strong>2026</strong></div>
         <div>Vigência <strong>permanente</strong></div>
       </div>
     </div>
@@ -1015,7 +1026,6 @@
         <p class="frame-body">
           Dar voz, forma e direção às marcas que querem ser ouvidas com respeito. Traduzir a essência de cada negócio em comunicação que move pessoas — e move o ponteiro.
         </p>
-        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
       </article>
 
       <article class="frame">
@@ -1025,7 +1035,6 @@
         <p class="frame-body">
           Ser referência em criação digital com critério no Brasil — o estúdio escolhido por marcas que entendem que substância vale mais que ruído. Crescer junto com cada cliente, sem perder o filtro.
         </p>
-        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
       </article>
 
       <article class="frame">
@@ -1038,7 +1047,6 @@
           <strong style="color:var(--ink);">Estratégia</strong> antes de execução.<br>
           <strong style="color:var(--ink);">Respeito</strong> ao cliente, ao público, ao tempo.
         </p>
-        <div class="frame-tag"><span>Pregado em:</span> 02.2026</div>
       </article>
     </div>
   </div>
@@ -1090,7 +1098,7 @@
     <div class="contato-grid">
       <div class="contato-aside reveal">
         <h2>Conta pra<br>gente o <em>projeto.</em></h2>
-        <p>Preenche o briefing ao lado e a gente entra em contato em até 48h úteis. Sem script, sem proposta enlatada — uma conversa real.</p>
+        <p>Preenche o briefing ao lado e a gente entra em contato em até 48h úteis. Sem script, sem proposta enlatada. Uma conversa real.</p>
 
         <div class="contato-info">
           <div class="contato-info-item">
@@ -1150,7 +1158,7 @@
                 <option value="midia">Mídia & performance</option>
                 <option value="web">Site / landing page</option>
                 <option value="combo">Combo (mais de um serviço)</option>
-                <option value="naosei">Ainda não sei — quero conversar</option>
+                <option value="naosei">Ainda não sei, quero conversar</option>
               </select>
             </div>
           </div>
