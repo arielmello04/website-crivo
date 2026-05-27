@@ -5,7 +5,8 @@ import { rateLimit } from 'express-rate-limit';
 
 import { insertBriefing, listBriefings, getBriefing } from './db.js';
 import { briefingSchema } from './validation.js';
-import { notifyNewBriefing } from './mailer.js';
+import { notifyNewBriefing, notifyQuestionario } from './mailer.js';
+import { createToken, validateToken } from './tokens.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -27,14 +28,28 @@ app.use(cors({
   },
 }));
 
-// Rate limit pro POST do briefing: 5 envios por IP a cada 15 minutos.
-// Protege contra spam/bot. Outras rotas não são limitadas.
 const briefingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { ok: false, error: 'Muitas tentativas. Tenta de novo em alguns minutos.' },
+});
+
+const tokenLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Muitas tentativas.' },
+});
+
+const questionarioLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Muitas tentativas.' },
 });
 
 // ============ ROTAS ============
@@ -130,6 +145,52 @@ app.get('/api/briefings/:id', (req, res) => {
   const briefing = getBriefing(Number(req.params.id));
   if (!briefing) return res.status(404).json({ ok: false, error: 'Não encontrado' });
   res.json({ ok: true, briefing });
+});
+
+// === POST /api/tokens/create — gera link de questionário para um cliente (admin) ===
+app.post('/api/tokens/create', tokenLimiter, (req, res) => {
+  const { adminKey, cliente } = req.body || {};
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret || adminKey !== adminSecret) {
+    return res.status(401).json({ ok: false, error: 'Senha incorreta.' });
+  }
+  if (!cliente?.trim()) {
+    return res.status(400).json({ ok: false, error: 'Nome do cliente é obrigatório.' });
+  }
+
+  const token = createToken(cliente.trim());
+  const baseUrl = (process.env.FRONTEND_URL || 'http://localhost').replace(/\/$/, '');
+  const link = `${baseUrl}/questionario?c=${token}`;
+
+  console.log(`[token] criado para: ${cliente.trim()}`);
+  res.json({ ok: true, link, cliente: cliente.trim() });
+});
+
+// === GET /api/tokens/validate — valida token antes de exibir o formulário ===
+app.get('/api/tokens/validate', (req, res) => {
+  const { token } = req.query;
+  const result = validateToken(token);
+  if (!result) return res.status(401).json({ ok: false, error: 'Link inválido ou expirado.' });
+  res.json({ ok: true, cliente: result.cliente });
+});
+
+// === POST /api/questionario — recebe o diagnóstico respondido pelo cliente ===
+app.post('/api/questionario', questionarioLimiter, async (req, res) => {
+  const { token, ...respostas } = req.body || {};
+  const tokenData = validateToken(token);
+
+  if (!tokenData) {
+    return res.status(401).json({ ok: false, error: 'Link inválido ou expirado.' });
+  }
+
+  console.log(`[questionario] respondido por: ${tokenData.cliente}`);
+
+  notifyQuestionario({ cliente: tokenData.cliente, respostas }).catch((err) => {
+    console.error('[email] erro questionário:', err);
+  });
+
+  return res.json({ ok: true });
 });
 
 // 404 padrão

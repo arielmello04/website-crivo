@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crivo · Gerar link</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=JetBrains+Mono:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f1ea; --bg-2: #ece6db; --ink: #1a1614; --ink-dim: #4a4540;
+    --ink-mute: #8a847b; --line: #d4ccbe; --accent: #c54a1a;
+    --serif: 'Fraunces', serif; --sans: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+
+  .card {
+    width: 100%; max-width: 480px;
+    background: var(--bg-2); border: 1px solid var(--line); padding: 48px 40px;
+    position: relative;
+  }
+  .card::before {
+    content: 'INTERNO.001';
+    position: absolute; top: -8px; left: 32px;
+    background: var(--bg); padding: 0 12px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .15em; color: var(--accent);
+  }
+
+  .card-title {
+    font-family: var(--serif); font-weight: 300; font-size: 32px;
+    letter-spacing: -.02em; line-height: 1.1; margin-bottom: 8px;
+  }
+  .card-title em { font-style: italic; color: var(--accent); }
+  .card-sub { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-mute); margin-bottom: 40px; }
+
+  .form-group { display: flex; flex-direction: column; margin-bottom: 24px; }
+  .form-label {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--ink-dim); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .form-label::before { content: '→'; color: var(--accent); font-size: 12px; }
+  .form-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--line);
+    padding: 12px 0; font-size: 16px; color: var(--ink); outline: none;
+    transition: border-color .3s; font-family: var(--sans);
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--ink-mute); }
+
+  .btn {
+    width: 100%; background: var(--ink); color: var(--bg);
+    padding: 18px; font-family: var(--mono); font-size: 13px;
+    text-transform: uppercase; letter-spacing: .12em; font-weight: 500;
+    border: none; cursor: pointer; transition: background .3s; margin-top: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn:hover { background: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; background: var(--ink); }
+
+  /* resultado */
+  .result { display: none; margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .result.show { display: block; }
+  .result-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-mute); margin-bottom: 12px; }
+  .result-link {
+    background: var(--bg); border: 1px solid var(--line); padding: 14px 16px;
+    font-family: var(--mono); font-size: 12px; color: var(--ink-dim);
+    word-break: break-all; line-height: 1.6; margin-bottom: 16px;
+    position: relative;
+  }
+  .copy-btn {
+    width: 100%; background: transparent; border: 1px solid var(--ink);
+    color: var(--ink); padding: 12px; font-family: var(--mono); font-size: 12px;
+    text-transform: uppercase; letter-spacing: .1em; cursor: pointer;
+    transition: all .25s;
+  }
+  .copy-btn:hover { background: var(--ink); color: var(--bg); }
+  .copy-btn.copied { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .new-btn {
+    margin-top: 12px; width: 100%; background: transparent; border: none;
+    color: var(--ink-mute); font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .1em; cursor: pointer;
+    padding: 8px; transition: color .2s;
+  }
+  .new-btn:hover { color: var(--accent); }
+
+  .error-msg { margin-top: 16px; color: #8b1e1e; font-family: var(--mono); font-size: 12px; display: none; }
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1 class="card-title">Gerar link de<br><em>questionário.</em></h1>
+  <p class="card-sub">Acesso interno · Crivo & Co.</p>
+
+  <div id="formArea">
+    <div class="form-group">
+      <label class="form-label" for="cliente">Nome do cliente</label>
+      <input type="text" id="cliente" class="form-input" placeholder="Ex.: Empresa X" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="adminKey">Senha de acesso</label>
+      <input type="password" id="adminKey" class="form-input" placeholder="••••••••" autocomplete="off">
+    </div>
+    <button class="btn" id="gerarBtn" onclick="gerarLink()">
+      <span id="btnLabel">Gerar link</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+    <p class="error-msg" id="errorMsg"></p>
+  </div>
+
+  <div class="result" id="result">
+    <p class="result-label">Link gerado para <strong id="clienteLabel"></strong></p>
+    <div class="result-link" id="linkDisplay"></div>
+    <button class="copy-btn" id="copyBtn" onclick="copiarLink()">Copiar link</button>
+    <button class="new-btn" onclick="novoLink()">Gerar outro link →</button>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'https://website-crivo-production.up.railway.app';
+  let linkGerado = '';
+
+  async function gerarLink() {
+    const cliente = document.getElementById('cliente').value.trim();
+    const adminKey = document.getElementById('adminKey').value;
+    const btn = document.getElementById('gerarBtn');
+    const errorEl = document.getElementById('errorMsg');
+
+    errorEl.classList.remove('show');
+
+    if (!cliente) { document.getElementById('cliente').focus(); return; }
+    if (!adminKey) { document.getElementById('adminKey').focus(); return; }
+
+    btn.disabled = true;
+    document.getElementById('btnLabel').textContent = 'Gerando...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/tokens/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey, cliente }),
+      });
+      const data = await res.json();
+
+      if (!data.ok) {
+        errorEl.textContent = data.error || 'Erro ao gerar link.';
+        errorEl.classList.add('show');
+        btn.disabled = false;
+        document.getElementById('btnLabel').textContent = 'Gerar link';
+        return;
+      }
+
+      linkGerado = data.link;
+      document.getElementById('linkDisplay').textContent = data.link;
+      document.getElementById('clienteLabel').textContent = data.cliente;
+      document.getElementById('result').classList.add('show');
+      document.getElementById('formArea').style.display = 'none';
+
+    } catch {
+      errorEl.textContent = 'Erro de conexão. Verifique sua internet.';
+      errorEl.classList.add('show');
+      btn.disabled = false;
+      document.getElementById('btnLabel').textContent = 'Gerar link';
+    }
+  }
+
+  function copiarLink() {
+    if (!linkGerado) return;
+    navigator.clipboard.writeText(linkGerado).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Link copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function novoLink() {
+    linkGerado = '';
+    document.getElementById('cliente').value = '';
+    document.getElementById('btnLabel').textContent = 'Gerar link';
+    document.getElementById('gerarBtn').disabled = false;
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('formArea').style.display = 'block';
+    document.getElementById('cliente').focus();
+  }
+
+  // Enter para submeter
+  ['cliente', 'adminKey'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') gerarLink();
+    });
+  });
+</script>
+</body>
+</html>
