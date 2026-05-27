@@ -1256,6 +1256,30 @@
     return false;
   }
 
+  // Máscara de telefone — formata enquanto o usuário digita
+  (function () {
+    const input = document.getElementById('telefone');
+    if (!input) return;
+
+    function mascara(v) {
+      v = v.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 2)  return v.replace(/^(\d{0,2})/, '($1');
+      if (v.length <= 6)  return v.replace(/^(\d{2})(\d+)/, '($1) $2');
+      if (v.length <= 10) return v.replace(/^(\d{2})(\d{4})(\d+)/, '($1) $2-$3');
+      // celular com 9 dígito: (XX) 9 XXXX-XXXX
+      return v.replace(/^(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');
+    }
+
+    input.addEventListener('input', function (e) {
+      const pos = this.selectionStart;
+      const prev = this.value.length;
+      this.value = mascara(this.value);
+      // mantém cursor em posição razoável após formatação
+      const diff = this.value.length - prev;
+      this.setSelectionRange(pos + diff, pos + diff);
+    });
+  })();
+
 </script>
 
 </body>
