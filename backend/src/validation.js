@@ -7,7 +7,7 @@ export const SERVICOS = {
   midia:     'Mídia & performance',
   web:       'Site / landing page',
   combo:     'Combo (mais de um serviço)',
-  naosei:    'Ainda não sei — quero conversar',
+  naosei:    'Ainda não sei, quero conversar',
 };
 
 export const briefingSchema = z.object({
