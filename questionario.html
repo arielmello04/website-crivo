@@ -426,7 +426,17 @@
 </div><!-- /mainContent -->
 
 <script>
-  const API_BASE = 'https://website-crivo-production.up.railway.app';
+  // A API roda no Worker da Cloudflare e o site público fica na Vercel, então a
+  // chamada é absoluta. A origem da Vercel está liberada em ALLOWED_ORIGINS no
+  // wrangler.toml; servida pelo próprio Worker, a página também funciona.
+
+  // O fetch rejeita igual quando falta internet e quando o servidor está fora do ar.
+  // Sem distinguir os dois, a mensagem culpa a conexão do usuário por um problema nosso.
+  function msgFalhaRede(contexto) {
+    if (navigator.onLine === false) return 'Sem conexão. Verifique sua internet e tente de novo.';
+    return contexto;
+  }
+  const API_BASE = 'https://crivo.crivo-worker.workers.dev';
   const ARRAY_FIELDS = new Set(['obj', 'redes', 'percepcao']);
 
   const params = new URLSearchParams(window.location.search);
@@ -453,7 +463,7 @@
       if (!data.ok) { showError(data.error || 'Link inválido ou expirado.'); return; }
       showMain(data.cliente);
     } catch {
-      showError('Erro de conexão. Verifique sua internet e tente novamente.');
+      showError(msgFalhaRede('Nosso servidor está temporariamente indisponível. O problema é do nosso lado. Tente novamente em alguns minutos ou fale com a Crivo & Co.'));
     }
   }
 
@@ -535,7 +545,7 @@
       } catch {
         btn.disabled = false;
         btn.querySelector('span').textContent = 'Enviar Questionário';
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
+        alert(msgFalhaRede('Nosso servidor está temporariamente indisponível. Suas respostas não foram perdidas: deixe esta página aberta e tente enviar de novo em alguns minutos.'));
       }
     });
   }

@@ -16,3 +16,11 @@ Thumbs.db
 
 # claude code
 .claude/
+
+# build do site para o Cloudflare Pages
+worker/dist/
+
+# worker
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars

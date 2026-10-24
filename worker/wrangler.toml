@@ -1,0 +1,33 @@
+name = "crivo"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Sem nodejs_compat de propósito: o port trocou node:crypto por Web Crypto e
+# better-sqlite3 por D1, então nada aqui depende de builtins do Node.
+
+# Site e API no mesmo Worker, logo na mesma origem. Assets casam primeiro
+# (run_worker_first fica no padrão false); o que não for arquivo estático
+# cai no script, que trata /api/* e /health.
+# Gere a pasta com: node build-site.mjs (na raiz do repo)
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "crivo"
+database_id = "621ed4ea-7764-4c30-bde6-89a5422e076e"
+
+# Valores não sensíveis. Os segredos (BREVO_API_KEY, ADMIN_SECRET, ADMIN_TOKEN,
+# TOKEN_SECRET) entram por `wrangler secret put`, nunca neste arquivo.
+#
+# ALLOWED_ORIGINS existe só para origens EXTRA. A própria origem do Worker é
+# sempre aceita, então em operação normal não é preciso listar nada aqui.
+[vars]
+# O site público continua na Vercel e chama esta API de lá; por isso a origem
+# dela entra aqui, e os links de questionário apontam para a Vercel.
+ALLOWED_ORIGINS = "https://website-crivo.vercel.app"
+FRONTEND_URL = "https://website-crivo.vercel.app"
+EMAIL_FROM = "Crivo & Co. <crivoeco@gmail.com>"
+EMAIL_NOTIFY = "crivoeco@gmail.com"
+EMAIL_ENABLED = "true"

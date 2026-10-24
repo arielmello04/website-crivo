@@ -131,7 +131,17 @@
 </div>
 
 <script>
-  const API_BASE = 'https://website-crivo-production.up.railway.app';
+  // A API roda no Worker da Cloudflare e o site público fica na Vercel, então a
+  // chamada é absoluta. A origem da Vercel está liberada em ALLOWED_ORIGINS no
+  // wrangler.toml; servida pelo próprio Worker, a página também funciona.
+
+  // O fetch rejeita igual quando falta internet e quando o servidor está fora do ar.
+  // Sem distinguir os dois, a mensagem culpa a conexão do usuário por um problema nosso.
+  function msgFalhaRede(contexto) {
+    if (navigator.onLine === false) return 'Sem conexão. Verifique sua internet e tente de novo.';
+    return contexto;
+  }
+  const API_BASE = 'https://crivo.crivo-worker.workers.dev';
   let linkGerado = '';
 
   async function gerarLink() {
@@ -171,7 +181,7 @@
       document.getElementById('formArea').style.display = 'none';
 
     } catch {
-      errorEl.textContent = 'Erro de conexão. Verifique sua internet.';
+      errorEl.textContent = msgFalhaRede('Backend fora do ar (' + location.origin + '). Não é a sua internet. Verifique o deploy.');
       errorEl.classList.add('show');
       btn.disabled = false;
       document.getElementById('btnLabel').textContent = 'Gerar link';

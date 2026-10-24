@@ -1288,10 +1288,9 @@
   });
 
   // ============ CONFIGURAÇÃO DA API ============
-  // Site e API são servidos pelo mesmo Worker, então as chamadas são relativas.
-  // Sem origem cruzada não existe CORS — e some a classe de falha que originou
-  // este código: uma resposta sem cabeçalho CORS que o navegador bloqueava,
-  // fazendo um servidor fora do ar parecer problema de internet do visitante.
+  // A API roda no Worker da Cloudflare e o site público fica na Vercel, então a
+  // chamada é absoluta. A origem da Vercel está liberada em ALLOWED_ORIGINS no
+  // wrangler.toml; servida pelo próprio Worker, a página também funciona.
 
   // O fetch rejeita igual quando falta internet e quando o servidor está fora do ar.
   // Sem distinguir os dois, a mensagem culpa a conexão do usuário por um problema nosso.
@@ -1299,7 +1298,7 @@
     if (navigator.onLine === false) return 'Sem conexão. Verifique sua internet e tente de novo.';
     return contexto;
   }
-  const API_ENDPOINT = '/api/briefings';
+  const API_ENDPOINT = 'https://crivo.crivo-worker.workers.dev/api/briefings';
 
   function markInvalid(el, msgId) {
     el.classList.add('input-invalid');
