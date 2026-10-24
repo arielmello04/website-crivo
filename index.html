@@ -5,10 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Crivo & Co. | Estúdio criativo. Marcas que passam pelo crivo.</title>
 <meta name="description" content="Crivo & Co. é um estúdio criativo digital. Branding, conteúdo, mídia e performance, com critério." />
+<meta name="theme-color" content="#f5f1ea" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:title" content="Crivo & Co. | Marcas que passam pelo crivo" />
+<meta property="og:description" content="Estúdio criativo digital em Camaçari, BA. Branding, conteúdo, mídia e sites, com critério." />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1614'/%3E%3Cpath d='M22.36 9.64A9 9 0 1 0 22.36 22.36' fill='none' stroke='%23f5f1ea' stroke-width='3.2' stroke-linecap='round'/%3E%3Ccircle cx='17.2' cy='16' r='2.8' fill='%23c54a1a'/%3E%3C/svg%3E" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
   /* ============ TOKENS — PALETA EDITORIAL ============ */
@@ -26,11 +32,19 @@
     --warn:      #8b1e1e;
 
     --serif:     'Fraunces', 'Times New Roman', serif;
-    --sans:      'Inter', system-ui, sans-serif;
-    --mono:      'JetBrains Mono', 'Courier New', monospace;
+    --sans:      'Geist', system-ui, sans-serif;
+    --mono:      'Geist Mono', ui-monospace, monospace;
 
     --maxw:      1440px;
     --pad:       clamp(20px, 4vw, 64px);
+
+    --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+    --shadow:    0 18px 40px -18px rgba(90, 52, 28, 0.28);
+
+    /* escala de z-index */
+    --z-nav:     50;
+    --z-grain:   60;
+    --z-skip:    70;
   }
 
   /* ============ BASE ============ */
@@ -47,7 +61,21 @@
     cursor: default;
   }
   ::selection { background: var(--accent); color: var(--bg); }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
   a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .skip-link {
+    position: fixed; top: 12px; left: 12px;
+    z-index: var(--z-skip);
+    padding: 10px 16px;
+    background: var(--ink); color: var(--bg);
+    font-size: 14px;
+    border-radius: 6px;
+    transform: translateY(-160%);
+    transition: transform 0.2s var(--ease);
+  }
+  .skip-link:focus { transform: none; }
   button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
   input, select, textarea { font-family: inherit; color: inherit; }
 
@@ -56,7 +84,7 @@
     content: '';
     position: fixed; inset: 0;
     pointer-events: none;
-    z-index: 100;
+    z-index: var(--z-grain);
     opacity: 0.06;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: multiply;
@@ -65,8 +93,8 @@
   /* ============ NAV ============ */
   .nav {
     position: fixed; top: 0; left: 0; right: 0;
-    z-index: 50;
-    padding: 20px var(--pad);
+    z-index: var(--z-nav);
+    padding: 18px var(--pad);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -84,43 +112,53 @@
     gap: 10px;
   }
   .logo-mark {
-    width: 28px; height: 28px;
-    position: relative;
-    display: inline-block;
+    width: 30px; height: 30px;
+    flex-shrink: 0;
+    transition: transform 0.6s var(--ease);
   }
-  .logo-mark svg { width: 100%; height: 100%; }
+  .logo:hover .logo-mark { transform: rotate(-20deg); }
   .logo-amp {
     color: var(--accent);
     font-style: italic;
   }
   .nav-links {
     display: flex;
-    gap: 36px;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    gap: 32px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-dim);
   }
   .nav-links a {
     position: relative;
     transition: color 0.2s;
   }
-  .nav-links a:hover { color: var(--accent); }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -4px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s var(--ease);
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a:hover::after,
+  .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--ink); }
   .nav-cta {
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 9px 16px;
     border: 1px solid var(--ink);
-    border-radius: 100px;
-    transition: all 0.25s;
+    border-radius: 8px;
+    transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.15s;
   }
   .nav-cta:hover {
-    background: var(--accent);
+    background: var(--ink);
     color: var(--bg);
-    border-color: var(--accent);
   }
+  .nav-cta:active { transform: scale(0.97); }
   @media (max-width: 768px) {
     .nav-links { display: none; }
   }
@@ -128,6 +166,7 @@
   /* ============ HERO ============ */
   .hero {
     min-height: 100vh;
+    min-height: 100dvh;
     padding: 140px var(--pad) 80px;
     position: relative;
     display: flex;
@@ -152,24 +191,13 @@
   .hero-top {
     display: flex;
     justify-content: space-between;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
     color: var(--ink-dim);
-    margin-bottom: 60px;
+    margin-bottom: 48px;
     position: relative;
     z-index: 2;
-  }
-  .hero-top span:first-child::before {
-    content: '◉';
-    color: var(--accent);
-    margin-right: 8px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
   }
 
   .hero-title {
@@ -230,23 +258,30 @@
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    padding: 18px 28px;
+    padding: 17px 26px;
     background: var(--ink);
     color: var(--bg);
-    font-family: var(--mono);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-size: 16px;
     font-weight: 500;
-    border-radius: 100px;
-    transition: all 0.3s;
+    border-radius: 10px;
+    transition: background 0.3s, transform 0.3s var(--ease), box-shadow 0.3s;
     position: relative;
     overflow: hidden;
   }
   .btn-primary:hover {
     background: var(--accent);
     transform: translateY(-2px);
+    box-shadow: var(--shadow);
   }
+  .btn-primary:active { transform: translateY(0) scale(0.98); box-shadow: none; }
+  .hero-alt {
+    font-size: 15px;
+    color: var(--ink-dim);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .hero-alt:hover { color: var(--ink); border-color: var(--ink); }
   .btn-primary svg {
     width: 16px; height: 16px;
     transition: transform 0.3s;
@@ -255,14 +290,12 @@
 
   .hero-meta {
     text-align: right;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-dim);
-    line-height: 1.8;
+    font-size: 14px;
+    color: var(--ink-mute);
+    line-height: 1.7;
   }
-  .hero-meta strong { color: var(--ink); font-weight: 400; }
+  .hero-meta strong { color: var(--ink); font-weight: 500; }
+  .hero-meta .status { color: var(--accent); }
 
   @media (max-width: 900px) {
     .hero-bottom { grid-template-columns: 1fr; gap: 32px; }
@@ -290,13 +323,16 @@
   }
   .marquee-track span { display: flex; align-items: center; gap: 60px; }
   .marquee-track span::after {
-    content: '✦';
-    color: var(--accent);
-    font-style: normal;
-    font-size: 14px;
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
   }
   @keyframes scroll {
     to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
   }
 
   /* ============ SECTION SHARED ============ */
@@ -307,21 +343,19 @@
     margin: 0 auto;
   }
   .section-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--accent);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-dim);
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 32px;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 28px;
   }
-  .section-label::before {
-    content: '';
-    width: 32px;
-    height: 1px;
-    background: var(--accent);
+  .section-label span {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--accent);
   }
   .section-title {
     font-family: var(--serif);
@@ -350,6 +384,7 @@
     font-size: 19px;
     line-height: 1.6;
     color: var(--ink-dim);
+    max-width: 62ch;
   }
   .sobre-text p { margin-bottom: 24px; }
   .sobre-text p:first-child {
@@ -365,39 +400,36 @@
     font-size: 1.2em;
     color: var(--accent);
   }
-  .sobre-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
+  /* o "filtro": o que entra e o que fica de fora */
+  .sobre-filtro {
+    background: var(--bg-2);
+    border-radius: 14px;
+    padding: 36px 32px 40px;
+    margin-top: 8px;
   }
-  .stat {
-    background: var(--bg);
-    padding: 32px 24px;
-  }
-  .stat-num {
+  .filtro-title {
     font-family: var(--serif);
-    font-size: 56px;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--ink);
-    letter-spacing: -0.03em;
+    font-style: italic;
+    font-size: 24px;
+    margin-bottom: 24px;
   }
-  .stat-num sup {
-    font-size: 18px;
-    color: var(--accent);
-    margin-left: 4px;
-    vertical-align: top;
+  .filtro-list { list-style: none; }
+  .filtro-list li {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    font-size: 16px;
   }
-  .stat-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-dim);
-    margin-top: 12px;
+  .filtro-list .fora {
+    color: var(--ink-mute);
+    text-decoration: line-through;
+    text-decoration-color: rgba(138, 132, 123, 0.6);
   }
+  .filtro-list .seta { color: var(--accent); font-family: var(--serif); }
+  .filtro-list .dentro { color: var(--ink); font-weight: 500; }
   @media (max-width: 900px) {
     .sobre-grid { grid-template-columns: 1fr; gap: 48px; }
   }
@@ -428,37 +460,39 @@
     gap: 24px;
   }
   .mvv-meta {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
     color: var(--ink-dim);
     text-align: right;
-    line-height: 1.8;
+    max-width: 280px;
+    line-height: 1.4;
   }
-  .mvv-meta strong { color: var(--accent); font-weight: 400; }
 
+  /* quadros pendurados em alturas e larguras diferentes, como numa parede de verdade */
   .mvv-frames {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 28px;
+    align-items: start;
     position: relative;
   }
   .frame {
     background: var(--bg);
-    border: 1px solid var(--line);
-    padding: 40px 36px;
+    padding: 40px 36px 44px;
+    border-radius: 4px;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 0 var(--line), 0 14px 30px -22px rgba(90, 52, 28, 0.35);
+    transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
   }
+  .frame:nth-child(1) { grid-column: 1 / span 7; transform: rotate(-0.6deg); }
+  .frame:nth-child(2) { grid-column: 8 / span 5; margin-top: 72px; transform: rotate(0.8deg); }
+  .frame:nth-child(3) { grid-column: 2 / span 10; margin-top: 8px; }
   .frame:hover {
-    transform: translateY(-6px);
-    border-color: var(--accent);
-    box-shadow: 0 20px 40px rgba(26, 22, 20, 0.08);
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: 0 1px 0 var(--line), var(--shadow);
   }
   .frame:hover .frame-num { color: var(--accent); }
-  .frame:nth-child(2) { transform: translateY(20px); }
-  .frame:nth-child(2):hover { transform: translateY(14px); }
 
   /* canto superior — "prego na parede" */
   .frame::before {
@@ -474,19 +508,16 @@
 
   .frame-num {
     font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--ink-dim);
-    margin-bottom: 24px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-bottom: 20px;
     transition: color 0.3s;
   }
   .frame-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--ink-mute);
-    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
   }
   .frame-title {
     font-family: var(--serif);
@@ -499,25 +530,38 @@
     margin-bottom: 28px;
   }
   .frame-body {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    max-width: 58ch;
+  }
+  .frame-body strong { color: var(--ink); font-weight: 500; }
+  .valores {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .valores li {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
     font-size: 16px;
-    line-height: 1.55;
+    line-height: 1.45;
     color: var(--ink-dim);
   }
-  .frame-tag {
-    margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px dashed var(--line);
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-mute);
+  .valores strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 4px;
   }
-  .frame-tag span { color: var(--ink-dim); }
   @media (max-width: 900px) {
     .mvv-frames { grid-template-columns: 1fr; }
-    .frame:nth-child(2) { transform: none; }
-    .frame:nth-child(2):hover { transform: translateY(-6px); }
+    .frame:nth-child(n) { grid-column: auto; margin-top: 0; transform: none; }
+    .valores { grid-template-columns: 1fr 1fr; }
   }
 
   /* ============ SERVIÇOS ============ */
@@ -531,6 +575,7 @@
     align-items: end;
     margin-bottom: 64px;
   }
+  .servicos-title { margin-bottom: 0; }
   .servicos-sub {
     font-family: var(--serif);
     font-style: italic;
@@ -543,15 +588,15 @@
   }
   .servico-row {
     display: grid;
-    grid-template-columns: 80px 1fr 2fr 60px;
+    grid-template-columns: 56px 1fr 2fr 60px;
     gap: 32px;
     padding: 36px 0;
     border-bottom: 1px solid var(--line);
     align-items: center;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: padding 0.4s var(--ease);
     position: relative;
   }
+  .servico-row:hover { padding-left: 12px; }
   .servico-row::before {
     content: '';
     position: absolute;
@@ -566,9 +611,8 @@
 
   .servico-num {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-mute);
-    letter-spacing: 0.1em;
   }
   .servico-name {
     font-family: var(--serif);
@@ -640,34 +684,27 @@
   .contato-info-item {
     display: flex;
     justify-content: space-between;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-size: 15px;
     color: var(--ink-dim);
   }
-  .contato-info-item span:first-child {
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-mute);
-  }
-  .contato-info-item span:last-child { color: var(--ink); }
+  .contato-info-item span:first-child { color: var(--ink-mute); }
+  .contato-info-item > :last-child { color: var(--ink); }
+  .contato-info-item a { border-bottom: 1px solid var(--line); transition: border-color 0.2s, color 0.2s; }
+  .contato-info-item a:hover { color: var(--accent); border-color: var(--accent); }
+  .contato-info-item .destaque { color: var(--accent); }
 
   /* form */
   .form {
     background: var(--bg-2);
-    border: 1px solid var(--line);
-    padding: 48px 40px;
+    border-radius: 14px;
+    padding: 44px 40px 40px;
     position: relative;
   }
-  .form::before {
-    content: 'BRIEFING.001';
-    position: absolute;
-    top: -8px; left: 32px;
-    background: var(--bg);
-    padding: 0 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--accent);
+  .form-head {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    margin-bottom: 28px;
   }
   .form-row {
     display: grid;
@@ -679,20 +716,10 @@
   .form-group.full { grid-column: 1 / -1; }
 
   .form-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--ink-dim);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .form-label::before {
-    content: '→';
-    color: var(--accent);
-    font-size: 12px;
+    margin-bottom: 6px;
   }
   .form-input,
   .form-textarea {
@@ -725,7 +752,7 @@
     font-family: var(--sans);
     color: var(--ink);
     outline: none;
-    border-radius: 0;
+    border-radius: 8px;
     transition: border-color 0.3s, background 0.3s;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a847b' stroke-width='1.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -750,22 +777,32 @@
     width: 100%;
     background: var(--ink);
     color: var(--bg);
-    padding: 22px;
-    font-family: var(--mono);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    padding: 19px;
+    font-size: 16px;
     font-weight: 500;
-    border-radius: 0;
-    transition: all 0.3s;
+    border-radius: 10px;
+    transition: background 0.3s, transform 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 14px;
   }
-  .form-submit:hover {
+  .form-submit:hover:not(:disabled) {
     background: var(--accent);
   }
+  .form-submit:active:not(:disabled) { transform: scale(0.99); }
+  .form-error {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-left: 2px solid var(--warn);
+    background: rgba(139, 30, 30, 0.06);
+    color: var(--warn);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .form-error.show { display: block; }
+  .form-error a { text-decoration: underline; }
   .form-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -780,21 +817,16 @@
     75%       { transform: translateX(6px); }
   }
   .field-msg {
-    font-family: var(--mono);
-    font-size: 10px;
+    font-size: 13px;
     color: var(--warn);
-    letter-spacing: .05em;
     margin-top: 6px;
     display: none;
   }
   .field-msg.show { display: block; }
 
   .form-foot {
-    margin-top: 20px;
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    margin-top: 16px;
+    font-size: 13px;
     color: var(--ink-mute);
     text-align: center;
   }
@@ -853,16 +885,20 @@
     line-height: 0.9;
   }
   .footer-big em { font-style: italic; color: var(--accent); }
+  .footer-side {
+    font-size: 15px;
+    color: var(--ink-dim);
+    line-height: 1.7;
+    text-align: right;
+  }
+  .footer-side em { font-family: var(--serif); color: var(--accent); }
   .footer-bottom {
     display: flex;
     justify-content: space-between;
     padding-top: 24px;
     border-top: 1px solid var(--line);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-dim);
+    font-size: 13px;
+    color: var(--ink-mute);
     flex-wrap: wrap;
     gap: 16px;
   }
@@ -902,24 +938,26 @@
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: none; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-stagger > *, .hero-title, .hero-lede, .hero-cta-group, .hero-meta, .hero-top {
+      opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important;
+    }
+  }
 </style>
 </head>
 <body>
 
 <!-- ============ NAV ============ -->
-<nav class="nav">
-  <a href="#" class="logo">
-    <span class="logo-mark">
-      <svg viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1"/>
-        <circle cx="16" cy="16" r="3" fill="#c54a1a"/>
-        <line x1="2" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="0.5"/>
-        <line x1="16" y1="2" x2="16" y2="30" stroke="currentColor" stroke-width="0.5"/>
-        <line x1="6" y1="6" x2="26" y2="26" stroke="currentColor" stroke-width="0.5"/>
-        <line x1="26" y1="6" x2="6" y2="26" stroke="currentColor" stroke-width="0.5"/>
-      </svg>
-    </span>
-    Crivo<span class="logo-amp">&</span>Co.
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<nav class="nav" aria-label="Principal">
+  <a href="#" class="logo" aria-label="Crivo & Co., início">
+    <!-- marca: um C aberto, com o grão que passou pelo crivo -->
+    <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M23.78 8.22 A11 11 0 1 0 23.78 23.78" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+      <circle cx="17.5" cy="16" r="3.2" fill="#c54a1a"/>
+    </svg>
+    <span>Crivo<span class="logo-amp">&</span>Co.</span>
   </a>
   <div class="nav-links">
     <a href="#sobre">Sobre</a>
@@ -931,6 +969,7 @@
 </nav>
 
 <!-- ============ HERO ============ -->
+<main id="conteudo">
 <section class="hero">
   <!-- malha / crivo decorativo -->
   <div class="hero-mesh" aria-hidden="true">
@@ -973,16 +1012,17 @@
           <polyline points="7 7 17 7 17 17"/>
         </svg>
       </a>
+      <a href="#servicos" class="hero-alt">Ver o que fazemos</a>
     </div>
     <div class="hero-meta">
-      <div>Sede <strong>Bahia, Brasil</strong></div>
-      <div>Status <strong style="color: var(--accent);">Aceitando briefings</strong></div>
+      <div>Estúdio em <strong>Camaçari, BA</strong></div>
+      <div class="status">Aceitando novos projetos</div>
     </div>
   </div>
 </section>
 
 <!-- ============ MARQUEE ============ -->
-<div class="marquee">
+<div class="marquee" aria-hidden="true">
   <div class="marquee-track">
     <span>Branding</span><span>Identidade visual</span><span>Conteúdo</span><span>Performance</span><span>Mídia paga</span><span>Estratégia digital</span><span>Redes sociais</span><span>Sites & landing pages</span>
     <span>Branding</span><span>Identidade visual</span><span>Conteúdo</span><span>Performance</span><span>Mídia paga</span><span>Estratégia digital</span><span>Redes sociais</span><span>Sites & landing pages</span>
@@ -992,7 +1032,7 @@
 <!-- ============ SOBRE ============ -->
 <section class="sobre" id="sobre">
   <div class="section-pad">
-    <div class="section-label reveal">[ 01 / Sobre ]</div>
+    <div class="section-label reveal"><span>01</span>Sobre</div>
     <h2 class="section-title reveal">A gente filtra<br>antes de <em>publicar.</em></h2>
 
     <div class="sobre-grid">
@@ -1001,24 +1041,15 @@
         <p>Trabalhamos como editor trabalha um texto: cortamos o que não precisa estar ali. Cada peça, cada campanha, cada palavra passa pelo nosso filtro antes de chegar no público. É isso que separa marca que comunica de marca que só ocupa espaço.</p>
         <p>Atendemos quem leva o próprio negócio a sério. Empresas que querem construir presença com substância, não com fórmula pronta.</p>
       </div>
-      <div class="sobre-stats reveal">
-        <div class="stat">
-          <div class="stat-num">4<sup>+</sup></div>
-          <div class="stat-label">Áreas de atuação</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">100<sup>%</sup></div>
-          <div class="stat-label">Projetos customizados</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">∞</div>
-          <div class="stat-label">Possibilidades</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">01</div>
-          <div class="stat-label">Critério inegociável</div>
-        </div>
-      </div>
+      <aside class="sobre-filtro reveal">
+        <p class="filtro-title">O que passa pelo crivo</p>
+        <ul class="filtro-list">
+          <li><span class="fora">Barulho</span><span class="seta">→</span><span class="dentro">Critério</span></li>
+          <li><span class="fora">Fórmula pronta</span><span class="seta">→</span><span class="dentro">Substância</span></li>
+          <li><span class="fora">Estilo pelo estilo</span><span class="seta">→</span><span class="dentro">Verdade</span></li>
+          <li><span class="fora">Postar por postar</span><span class="seta">→</span><span class="dentro">Estratégia</span></li>
+        </ul>
+      </aside>
     </div>
   </div>
 </section>
@@ -1028,18 +1059,15 @@
   <div class="section-pad">
     <div class="mvv-header">
       <div>
-        <div class="section-label reveal">[ 02 / Manifesto ]</div>
+        <div class="section-label reveal"><span>02</span>Manifesto</div>
         <h2 class="section-title reveal">A parede<br>do nosso <em>estúdio.</em></h2>
       </div>
-      <div class="mvv-meta reveal">
-        <div>Documento interno · v1.0</div>
-        <div>Vigência <strong>permanente</strong></div>
-      </div>
+      <p class="mvv-meta reveal">O que fica pendurado na frente da mesa e a gente relê antes de cada projeto.</p>
     </div>
 
     <div class="mvv-frames reveal-stagger">
       <article class="frame">
-        <div class="frame-num">FRAME · 01</div>
+        <div class="frame-num">01</div>
         <div class="frame-label">Missão</div>
         <h3 class="frame-title">O quê.</h3>
         <p class="frame-body">
@@ -1048,7 +1076,7 @@
       </article>
 
       <article class="frame">
-        <div class="frame-num">FRAME · 02</div>
+        <div class="frame-num">02</div>
         <div class="frame-label">Visão</div>
         <h3 class="frame-title">Onde.</h3>
         <p class="frame-body">
@@ -1057,15 +1085,15 @@
       </article>
 
       <article class="frame">
-        <div class="frame-num">FRAME · 03</div>
+        <div class="frame-num">03</div>
         <div class="frame-label">Valores</div>
         <h3 class="frame-title">Como.</h3>
-        <p class="frame-body">
-          <strong style="color:var(--ink);">Critério</strong> antes de criar.<br>
-          <strong style="color:var(--ink);">Verdade</strong> antes de estilo.<br>
-          <strong style="color:var(--ink);">Estratégia</strong> antes de execução.<br>
-          <strong style="color:var(--ink);">Respeito</strong> ao cliente, ao público, ao tempo.
-        </p>
+        <ul class="valores">
+          <li><strong>Critério</strong>antes de criar.</li>
+          <li><strong>Verdade</strong>antes de estilo.</li>
+          <li><strong>Estratégia</strong>antes de execução.</li>
+          <li><strong>Respeito</strong>ao cliente, ao público, ao tempo.</li>
+        </ul>
       </article>
     </div>
   </div>
@@ -1074,37 +1102,37 @@
 <!-- ============ SERVIÇOS ============ -->
 <section class="servicos" id="servicos">
   <div class="section-pad">
-    <div class="section-label reveal">[ 03 / Serviços ]</div>
+    <div class="section-label reveal"><span>03</span>Serviços</div>
     <div class="servicos-header">
-      <h2 class="section-title reveal" style="margin-bottom:0;">O que fazemos<br>quando dizemos <em>sim.</em></h2>
+      <h2 class="section-title reveal servicos-title">O que fazemos<br>quando dizemos <em>sim.</em></h2>
       <p class="servicos-sub reveal">Quatro frentes que conversam entre si. Você pode contratar uma, todas, ou desenhar o pacote que faz sentido.</p>
     </div>
 
     <div class="servicos-list reveal-stagger">
-      <div class="servico-row">
-        <div class="servico-num">01 / BRD</div>
+      <a class="servico-row" href="#contato" data-servico="branding">
+        <div class="servico-num">01</div>
         <div class="servico-name">Branding<em> & identidade</em></div>
         <div class="servico-desc">Do nome ao manual de marca. Posicionamento, naming, identidade visual, tom de voz. A base de tudo.</div>
-        <div class="servico-arrow">↗</div>
-      </div>
-      <div class="servico-row">
-        <div class="servico-num">02 / CNT</div>
+        <div class="servico-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="servico-row" href="#contato" data-servico="conteudo">
+        <div class="servico-num">02</div>
         <div class="servico-name">Conteúdo<em> & social</em></div>
         <div class="servico-desc">Estratégia de redes, calendário editorial, produção de conteúdo, gestão de comunidade. Presença que conversa.</div>
-        <div class="servico-arrow">↗</div>
-      </div>
-      <div class="servico-row">
-        <div class="servico-num">03 / MID</div>
+        <div class="servico-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="servico-row" href="#contato" data-servico="midia">
+        <div class="servico-num">03</div>
         <div class="servico-name">Mídia<em> & performance</em></div>
         <div class="servico-desc">Tráfego pago em Meta, Google e TikTok. Funis, conversão, ROAS. Quando o objetivo é resultado mensurável.</div>
-        <div class="servico-arrow">↗</div>
-      </div>
-      <div class="servico-row">
-        <div class="servico-num">04 / WEB</div>
+        <div class="servico-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="servico-row" href="#contato" data-servico="web">
+        <div class="servico-num">04</div>
         <div class="servico-name">Sites<em> & landing pages</em></div>
         <div class="servico-desc">Páginas e sites que vendem, captam ou apresentam. Design autoral, código limpo, performance real.</div>
-        <div class="servico-arrow">↗</div>
-      </div>
+        <div class="servico-arrow" aria-hidden="true">↗</div>
+      </a>
     </div>
   </div>
 </section>
@@ -1112,7 +1140,7 @@
 <!-- ============ CONTATO ============ -->
 <section class="contato" id="contato">
   <div class="section-pad">
-    <div class="section-label reveal">[ 04 / Contato ]</div>
+    <div class="section-label reveal"><span>04</span>Contato</div>
 
     <div class="contato-grid">
       <div class="contato-aside reveal">
@@ -1122,11 +1150,11 @@
         <div class="contato-info">
           <div class="contato-info-item">
             <span>Email</span>
-            <span>crivoeco@gmail.com</span>
+            <a href="mailto:crivoeco@gmail.com">crivoeco@gmail.com</a>
           </div>
           <div class="contato-info-item">
             <span>WhatsApp</span>
-            <span>(71) 9 9913-1244</span>
+            <a href="https://wa.me/5571999131244" target="_blank" rel="noopener">(71) 9 9913-1244</a>
           </div>
           <div class="contato-info-item">
             <span>Localização</span>
@@ -1134,7 +1162,7 @@
           </div>
           <div class="contato-info-item">
             <span>Resposta</span>
-            <span style="color: var(--accent);">Até 48h úteis</span>
+            <span class="destaque">Até 48h úteis</span>
           </div>
         </div>
       </div>
@@ -1145,6 +1173,7 @@
                style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;" aria-hidden="true">
 
         <div id="formFields">
+          <p class="form-head">Briefing</p>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="nome">Seu nome</label>
@@ -1198,7 +1227,8 @@
               <polyline points="12 5 19 12 12 19"/>
             </svg>
           </button>
-          <div class="form-foot">Resposta em até 48h úteis · Seus dados ficam só com a gente</div>
+          <div class="form-error" id="formError" role="alert"></div>
+          <div class="form-foot">Resposta em até 48h úteis. Seus dados ficam só com a gente.</div>
         </div>
 
         <div class="form-success" id="formSuccess">
@@ -1210,15 +1240,16 @@
     </div>
   </div>
 </section>
+</main>
 
 <!-- ============ FOOTER ============ -->
 <footer class="footer">
   <div class="footer-top">
     <div class="footer-big">Crivo<em>&</em>Co.</div>
-    <div style="font-family: var(--mono); font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.8; text-align: right;">
+    <div class="footer-side">
       <div>Estúdio criativo digital</div>
-      <div>Branding · Conteúdo · Mídia · Web</div>
-      <div style="color: var(--accent);">passou no crivo, comunica</div>
+      <div>Branding, conteúdo, mídia e web</div>
+      <em>passou no crivo, comunica.</em>
     </div>
   </div>
   <div class="footer-bottom">
@@ -1239,10 +1270,36 @@
 
   document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
 
+  // Link ativo no menu conforme a seção visível
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+
+  // Clicar num serviço já deixa ele escolhido no briefing
+  document.querySelectorAll('.servico-row[data-servico]').forEach((row) => {
+    row.addEventListener('click', () => {
+      document.getElementById('servico').value = row.dataset.servico;
+    });
+  });
+
   // ============ CONFIGURAÇÃO DA API ============
-  // Troque pela URL do seu backend no Railway antes de subir pra produção.
-  // Exemplo: 'https://crivo-backend-production.up.railway.app/api/briefings'
-  const API_ENDPOINT = 'https://website-crivo-production.up.railway.app/api/briefings';
+  // Site e API são servidos pelo mesmo Worker, então as chamadas são relativas.
+  // Sem origem cruzada não existe CORS — e some a classe de falha que originou
+  // este código: uma resposta sem cabeçalho CORS que o navegador bloqueava,
+  // fazendo um servidor fora do ar parecer problema de internet do visitante.
+
+  // O fetch rejeita igual quando falta internet e quando o servidor está fora do ar.
+  // Sem distinguir os dois, a mensagem culpa a conexão do usuário por um problema nosso.
+  function msgFalhaRede(contexto) {
+    if (navigator.onLine === false) return 'Sem conexão. Verifique sua internet e tente de novo.';
+    return contexto;
+  }
+  const API_ENDPOINT = '/api/briefings';
 
   function markInvalid(el, msgId) {
     el.classList.add('input-invalid');
@@ -1271,6 +1328,8 @@
     }
 
     const btn = document.getElementById('submitBtn');
+    const errorBox = document.getElementById('formError');
+    errorBox.classList.remove('show');
     btn.disabled = true;
     btn.querySelector('span').textContent = 'Enviando...';
 
@@ -1283,10 +1342,11 @@
       body: JSON.stringify(data),
     })
       .then(async (res) => {
-        const body = await res.json();
+        // resposta sem JSON (proxy, página de erro) não pode virar mensagem técnica na tela
+        const body = await res.json().catch(() => ({}));
         if (!res.ok || !body.ok) {
           // se for erro de validação, mostra a primeira mensagem específica
-          const msg = body.issues?.[0]?.message || body.error || 'Erro ao enviar';
+          const msg = body.issues?.[0]?.message || body.error || 'O servidor recusou o envio.';
           throw new Error(msg);
         }
         document.getElementById('formFields').style.display = 'none';
@@ -1295,7 +1355,17 @@
       .catch((err) => {
         btn.disabled = false;
         btn.querySelector('span').textContent = 'Enviar briefing';
-        alert('Não foi possível enviar agora.\n\n' + err.message + '\n\nTenta de novo em alguns instantes ou nos chama no WhatsApp.');
+        const detalhe = err instanceof TypeError
+          ? msgFalhaRede('Nosso servidor está temporariamente indisponível (não é a sua internet).')
+          : err.message;
+        errorBox.textContent = 'Não foi possível enviar agora. ' + detalhe + ' Tenta de novo em alguns instantes ou ';
+        const wa = document.createElement('a');
+        wa.href = 'https://wa.me/5571999131244';
+        wa.target = '_blank';
+        wa.rel = 'noopener';
+        wa.textContent = 'chama a gente no WhatsApp.';
+        errorBox.appendChild(wa);
+        errorBox.classList.add('show');
       });
 
     return false;
