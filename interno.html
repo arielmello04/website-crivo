@@ -768,7 +768,7 @@
       `<div class="painel" style="max-width:560px">
         <form onsubmit="gerarLink(event)" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
           <label class="campo" style="flex:1;min-width:220px"><span>Nome do cliente</span>
-            <input class="in" id="qCliente" list="qClientes" required placeholder="Ex.: RCI Transmission"></label>
+            <input class="in" id="qCliente" list="qClientes" required placeholder="Ex.: Nome da empresa"></label>
           <datalist id="qClientes">${D.cliente.map((c) => `<option value="${esc(c.empresa || c.nome)}">`).join('')}</datalist>
           <button class="btn" id="qBtn" type="submit">Gerar link</button>
         </form>
