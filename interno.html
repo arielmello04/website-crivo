@@ -3,230 +3,936 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crivo · Gerar link</title>
+<title>Crivo · Interno</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=JetBrains+Mono:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1614'/%3E%3Cpath d='M22.36 9.64A9 9 0 1 0 22.36 22.36' fill='none' stroke='%23f5f1ea' stroke-width='3.2' stroke-linecap='round'/%3E%3Ccircle cx='17.2' cy='16' r='2.8' fill='%23c54a1a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Painel interno da Crivo. Nenhum dado mora neste arquivo (o repositório é
+     público): tudo vem da API /api/admin do Worker depois do login. */
   :root {
-    --bg: #f5f1ea; --bg-2: #ece6db; --ink: #1a1614; --ink-dim: #4a4540;
-    --ink-mute: #8a847b; --line: #d4ccbe; --accent: #c54a1a;
-    --serif: 'Fraunces', serif; --sans: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
+    --bg: #f5f1ea; --bg-2: #ece6db; --bg-3: #e2dbcc; --card: #fbf9f5;
+    --ink: #1a1614; --ink-dim: #4a4540; --ink-mute: #8a847b;
+    --line: #d4ccbe; --line-2: #e4ddd0;
+    --accent: #c54a1a; --accent-soft: rgba(197, 74, 26, 0.1);
+    --ok: #3d6b3a; --ok-soft: rgba(61, 107, 58, 0.12);
+    --warn: #8b1e1e; --warn-soft: rgba(139, 30, 30, 0.09);
+    --info: #3b5a7a; --info-soft: rgba(59, 90, 122, 0.12);
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; background: none; border: none; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .mute { color: var(--ink-mute); }
+  [hidden] { display: none !important; }
 
-  .card {
-    width: 100%; max-width: 480px;
-    background: var(--bg-2); border: 1px solid var(--line); padding: 48px 40px;
-    position: relative;
-  }
-  .card::before {
-    content: 'INTERNO.001';
-    position: absolute; top: -8px; left: 32px;
-    background: var(--bg); padding: 0 12px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: .15em; color: var(--accent);
-  }
+  /* ============ LOGIN ============ */
+  .login { min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; }
+  .login-card { width: 100%; max-width: 400px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 21px; letter-spacing: -0.02em; }
+  .brand svg { width: 28px; height: 28px; flex-shrink: 0; }
+  .brand em { color: var(--accent); font-style: italic; }
+  .login-card .brand { margin-bottom: 40px; }
+  .login-card h1 { font-family: var(--serif); font-weight: 300; font-size: 40px; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .login-card h1 em { font-style: italic; color: var(--accent); }
+  .login-card p { color: var(--ink-dim); margin-bottom: 28px; }
 
-  .card-title {
-    font-family: var(--serif); font-weight: 300; font-size: 32px;
-    letter-spacing: -.02em; line-height: 1.1; margin-bottom: 8px;
+  /* ============ CAMPOS E BOTÕES ============ */
+  .campo { display: flex; flex-direction: column; gap: 6px; }
+  .campo > span { font-size: 13px; font-weight: 500; color: var(--ink-dim); }
+  .in {
+    width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .card-title em { font-style: italic; color: var(--accent); }
-  .card-sub { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-mute); margin-bottom: 40px; }
-
-  .form-group { display: flex; flex-direction: column; margin-bottom: 24px; }
-  .form-label {
-    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: .12em; color: var(--ink-dim); margin-bottom: 10px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .form-label::before { content: '→'; color: var(--accent); font-size: 12px; }
-  .form-input {
-    background: transparent; border: none; border-bottom: 1px solid var(--line);
-    padding: 12px 0; font-size: 16px; color: var(--ink); outline: none;
-    transition: border-color .3s; font-family: var(--sans);
-  }
-  .form-input:focus { border-color: var(--accent); }
-  .form-input::placeholder { color: var(--ink-mute); }
-
+  .in:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea.in { resize: vertical; min-height: 88px; }
+  select.in { appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a847b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
   .btn {
-    width: 100%; background: var(--ink); color: var(--bg);
-    padding: 18px; font-family: var(--mono); font-size: 13px;
-    text-transform: uppercase; letter-spacing: .12em; font-weight: 500;
-    border: none; cursor: pointer; transition: background .3s; margin-top: 8px;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 9px 14px; border-radius: 8px; font-weight: 500; font-size: 14px;
+    background: var(--ink); color: var(--bg); transition: background 0.2s, transform 0.12s, opacity 0.2s;
+    white-space: nowrap;
   }
-  .btn:hover { background: var(--accent); }
-  .btn:disabled { opacity: .5; cursor: not-allowed; background: var(--ink); }
+  .btn:hover:not(:disabled) { background: var(--accent); }
+  .btn:active:not(:disabled) { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-sec { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn-sec:hover:not(:disabled) { background: var(--bg-2); border-color: var(--ink-mute); }
+  .btn-perigo { background: transparent; color: var(--warn); border: 1px solid transparent; }
+  .btn-perigo:hover:not(:disabled) { background: var(--warn-soft); }
+  .btn-lg { width: 100%; padding: 13px; font-size: 15px; margin-top: 14px; }
+  .erro { color: var(--warn); font-size: 14px; min-height: 1.5em; margin-top: 10px; }
 
-  /* resultado */
-  .result { display: none; margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
-  .result.show { display: block; }
-  .result-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-mute); margin-bottom: 12px; }
-  .result-link {
-    background: var(--bg); border: 1px solid var(--line); padding: 14px 16px;
-    font-family: var(--mono); font-size: 12px; color: var(--ink-dim);
-    word-break: break-all; line-height: 1.6; margin-bottom: 16px;
-    position: relative;
+  /* ============ LAYOUT ============ */
+  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100dvh; }
+  .rail {
+    position: sticky; top: 0; height: 100dvh; overflow-y: auto;
+    border-right: 1px solid var(--line); padding: 22px 14px; display: flex; flex-direction: column; gap: 22px;
+    background: var(--bg);
   }
-  .copy-btn {
-    width: 100%; background: transparent; border: 1px solid var(--ink);
-    color: var(--ink); padding: 12px; font-family: var(--mono); font-size: 12px;
-    text-transform: uppercase; letter-spacing: .1em; cursor: pointer;
-    transition: all .25s;
+  .rail .brand { padding: 0 8px; }
+  .menu { display: flex; flex-direction: column; gap: 2px; }
+  .menu-titulo { font-size: 12px; color: var(--ink-mute); padding: 14px 10px 6px; }
+  .menu button, .menu a {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
+    color: var(--ink-dim); text-align: left; text-decoration: none; font-size: 14.5px; transition: background 0.15s, color 0.15s;
   }
-  .copy-btn:hover { background: var(--ink); color: var(--bg); }
-  .copy-btn.copied { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .new-btn {
-    margin-top: 12px; width: 100%; background: transparent; border: none;
-    color: var(--ink-mute); font-family: var(--mono); font-size: 11px;
-    text-transform: uppercase; letter-spacing: .1em; cursor: pointer;
-    padding: 8px; transition: color .2s;
-  }
-  .new-btn:hover { color: var(--accent); }
+  .menu button:hover, .menu a:hover { background: var(--bg-2); color: var(--ink); }
+  .menu button.ativo { background: var(--ink); color: var(--bg); }
+  .menu svg { width: 17px; height: 17px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .menu .badge { margin-left: auto; font-size: 12px; font-family: var(--mono); padding: 0 7px; border-radius: 10px; background: var(--accent); color: var(--bg); }
+  .rail-pe { margin-top: auto; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-mute); padding: 0 8px; }
+  .rail-pe button { text-align: left; color: var(--ink-dim); font-size: 14px; }
+  .rail-pe button:hover { color: var(--accent); }
 
-  .error-msg { margin-top: 16px; color: #8b1e1e; font-family: var(--mono); font-size: 12px; display: none; }
-  .error-msg.show { display: block; }
+  .main { padding: 28px clamp(16px, 3vw, 44px) 80px; min-width: 0; }
+  .topo { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .topo h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
+  .topo h1 em { font-style: italic; color: var(--accent); }
+  .topo p { color: var(--ink-mute); font-size: 14px; margin-top: 6px; }
+  .acoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filtros .in { width: auto; min-width: 160px; padding: 8px 12px; }
+  .filtros .busca { flex: 1; min-width: 200px; max-width: 360px; }
+
+  /* barra móvel */
+  .barra-movel { display: none; }
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .rail { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 40; transform: translateX(-100%); transition: transform 0.3s var(--ease); box-shadow: 0 0 40px rgba(26, 22, 20, 0.2); }
+    .rail.aberto { transform: none; }
+    .barra-movel { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 20; }
+    .barra-movel button { padding: 6px; }
+    .barra-movel svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .main { padding-top: 20px; }
+  }
+
+  /* ============ BLOCOS ============ */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .kpi { background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; padding: 16px 18px; }
+  .kpi span { font-size: 13px; color: var(--ink-mute); }
+  .kpi b { display: block; font-family: var(--serif); font-weight: 400; font-size: 30px; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; }
+  .kpi small { font-size: 12.5px; color: var(--ink-mute); }
+  .kpi.destaque { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .kpi.destaque span, .kpi.destaque small { color: rgba(245, 241, 234, 0.65); }
+
+  .grade-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 1100px) { .grade-2 { grid-template-columns: 1fr; } }
+  .painel { background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; padding: 18px 20px; min-width: 0; }
+  .painel h2 { font-family: var(--serif); font-weight: 400; font-size: 20px; letter-spacing: -0.01em; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .painel h2 button { font-family: var(--sans); font-size: 13px; color: var(--ink-mute); }
+  .painel h2 button:hover { color: var(--accent); }
+  .lista-simples { list-style: none; }
+  .lista-simples li { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-top: 1px solid var(--line-2); font-size: 14px; cursor: pointer; }
+  .lista-simples li:first-child { border-top: none; }
+  .lista-simples li:hover .t { color: var(--accent); }
+  .lista-simples .d { font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); width: 52px; flex-shrink: 0; }
+  .lista-simples .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.15s; }
+  .lista-simples .v { font-size: 13px; color: var(--ink-mute); white-space: nowrap; }
+  .vazio { color: var(--ink-mute); font-size: 14px; padding: 18px 0; }
+  .vazio-grande { text-align: center; padding: 56px 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--ink-mute); }
+  .vazio-grande b { display: block; font-family: var(--serif); font-weight: 400; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+  .vazio-grande .btn { margin-top: 16px; }
+
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 500; padding: 2px 8px; border-radius: 5px; background: var(--bg-2); color: var(--ink-dim); white-space: nowrap; }
+  .tag.ok { background: var(--ok-soft); color: var(--ok); }
+  .tag.warn { background: var(--warn-soft); color: var(--warn); }
+  .tag.acc { background: var(--accent-soft); color: var(--accent); }
+  .tag.info { background: var(--info-soft); color: var(--info); }
+
+  /* tabela */
+  .tabela-wrap { background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-weight: 500; font-size: 13px; color: var(--ink-mute); padding: 11px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 11px 14px; border-top: 1px solid var(--line-2); vertical-align: middle; }
+  tbody tr { cursor: pointer; transition: background 0.12s; }
+  tbody tr:hover { background: var(--bg-2); }
+  td.dir, th.dir { text-align: right; }
+  td .sub { display: block; font-size: 12.5px; color: var(--ink-mute); }
+
+  /* kanban */
+  .kanban { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; }
+  .coluna { background: var(--bg-2); border-radius: 12px; padding: 12px; min-height: 260px; transition: background 0.15s; }
+  .coluna.alvo { background: var(--bg-3); outline: 2px dashed var(--ink-mute); outline-offset: -4px; }
+  .coluna h3 { font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; padding: 2px 4px 10px; }
+  .coluna h3 span { font-family: var(--mono); font-weight: 400; color: var(--ink-mute); }
+  .cartao { background: var(--card); border-radius: 9px; padding: 12px; margin-bottom: 8px; cursor: grab; box-shadow: 0 1px 0 var(--line); transition: box-shadow 0.15s, transform 0.15s; }
+  .cartao:hover { box-shadow: 0 1px 0 var(--line), 0 8px 18px -12px rgba(90, 52, 28, 0.4); }
+  .cartao.arrastando { opacity: 0.45; }
+  .cartao b { display: block; font-weight: 500; font-size: 14.5px; line-height: 1.35; margin-bottom: 6px; }
+  .cartao .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-mute); }
+  .progresso { height: 4px; background: var(--bg-3); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .progresso i { display: block; height: 100%; background: var(--ok); }
+
+  /* calendário */
+  .cal-nav { display: flex; align-items: center; gap: 8px; }
+  .cal-nav b { font-family: var(--serif); font-weight: 400; font-size: 22px; min-width: 190px; text-align: center; text-transform: capitalize; }
+  .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; background: var(--line-2); gap: 1px; }
+  .cal .dow { background: var(--bg-2); font-size: 12.5px; color: var(--ink-mute); padding: 8px 10px; }
+  .dia { background: var(--card); min-height: 112px; padding: 6px 7px; cursor: pointer; transition: background 0.12s; min-width: 0; }
+  .dia:hover { background: #fff; }
+  .dia.fora { background: var(--bg); color: var(--ink-mute); }
+  .dia .n { font-size: 13px; font-family: var(--mono); display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; }
+  .dia.hoje .n { background: var(--accent); color: var(--bg); }
+  .item-cal { display: block; width: 100%; text-align: left; font-size: 12px; line-height: 1.3; padding: 3px 6px; border-radius: 4px; margin-top: 3px; background: var(--bg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-cal.captacao { background: var(--accent-soft); color: var(--accent); }
+  .item-cal.reuniao { background: var(--info-soft); color: var(--info); }
+  .item-cal.entrega, .item-cal.prazo { background: var(--warn-soft); color: var(--warn); }
+  .item-cal.financeiro { background: var(--ok-soft); color: var(--ok); }
+  .item-cal.evento { background: var(--ink); color: var(--bg); }
+  .legenda { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  @media (max-width: 700px) { .dia { min-height: 74px; } .item-cal { font-size: 0; height: 6px; padding: 0; } .cal-nav b { min-width: 0; font-size: 18px; } }
+
+  /* processos */
+  .grade-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .proc { background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; padding: 18px; cursor: pointer; transition: border-color 0.15s, transform 0.2s var(--ease); display: flex; flex-direction: column; gap: 8px; }
+  .proc:hover { border-color: var(--ink-mute); transform: translateY(-2px); }
+  .proc b { font-family: var(--serif); font-weight: 400; font-size: 20px; line-height: 1.2; }
+  .proc p { font-size: 14px; color: var(--ink-dim); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .proc .meta { margin-top: auto; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); }
+
+  /* financeiro */
+  .fin-linha td:first-child { width: 36px; }
+  .check { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--line); display: grid; place-items: center; transition: background 0.15s, border-color 0.15s; }
+  .check.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .check svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 3; fill: none; }
+  .valor-receita { color: var(--ok); }
+  .valor-despesa { color: var(--warn); }
+
+  /* ============ GAVETA ============ */
+  .veu { position: fixed; inset: 0; background: rgba(26, 22, 20, 0.32); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .veu.aberto { opacity: 1; pointer-events: auto; }
+  .gaveta {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); z-index: 60;
+    background: var(--bg); box-shadow: -20px 0 50px -20px rgba(26, 22, 20, 0.35);
+    transform: translateX(100%); transition: transform 0.35s var(--ease);
+    display: flex; flex-direction: column;
+  }
+  .gaveta.aberta { transform: none; }
+  .g-topo { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--line); gap: 12px; }
+  .g-topo h2 { font-family: var(--serif); font-weight: 400; font-size: 22px; letter-spacing: -0.01em; }
+  .g-topo button svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+  .g-corpo { flex: 1; overflow-y: auto; padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; align-content: start; }
+  .g-corpo .larga { grid-column: 1 / -1; }
+  .g-pe { display: flex; gap: 8px; justify-content: space-between; padding: 14px 22px; border-top: 1px solid var(--line); }
+  .g-pe .dir { display: flex; gap: 8px; }
+  @media (max-width: 560px) { .g-corpo { grid-template-columns: 1fr; } }
+  .toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; padding-top: 22px; }
+  .toggle input { width: 18px; height: 18px; accent-color: var(--ok); }
+
+  .checklist { display: flex; flex-direction: column; gap: 4px; }
+  .checklist .item { display: grid; grid-template-columns: 22px minmax(0, 1fr) 28px; gap: 8px; align-items: center; }
+  .checklist .item input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--ok); }
+  .checklist .item .in { padding: 7px 10px; }
+  .checklist .item.feito .in { text-decoration: line-through; color: var(--ink-mute); }
+  .checklist .rm { color: var(--ink-mute); font-size: 18px; line-height: 1; }
+  .checklist .rm:hover { color: var(--warn); }
+  .checklist .add-item { align-self: flex-start; font-size: 13.5px; color: var(--ink-dim); padding: 6px 0; }
+  .checklist .add-item:hover { color: var(--accent); }
+
+  .relacionados { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 4px; }
+  .relacionados h3 { font-size: 13px; font-weight: 500; color: var(--ink-mute); margin: 10px 0 4px; }
+  .relacionados .lista-simples li { font-size: 13.5px; }
+
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.25s var(--ease); z-index: 80; }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+  .toast.erro-t { background: var(--warn); }
+
+  .carregando { padding: 60px; text-align: center; color: var(--ink-mute); }
+  .link-box { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-family: var(--mono); font-size: 13px; word-break: break-all; margin: 14px 0 10px; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1 class="card-title">Gerar link de<br><em>questionário.</em></h1>
-  <p class="card-sub">Acesso interno · Crivo & Co.</p>
-
-  <div id="formArea">
-    <div class="form-group">
-      <label class="form-label" for="cliente">Nome do cliente</label>
-      <input type="text" id="cliente" class="form-input" placeholder="Ex.: Empresa X" autocomplete="off">
+<!-- ============ LOGIN ============ -->
+<div class="login" id="telaLogin">
+  <form class="login-card" onsubmit="entrar(event)">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M23.78 8.22 A11 11 0 1 0 23.78 23.78" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="17.5" cy="16" r="3.2" fill="#c54a1a"/></svg>
+      <span>Crivo<em>&</em>Co.</span>
     </div>
-    <div class="form-group">
-      <label class="form-label" for="adminKey">Senha de acesso</label>
-      <div style="position:relative;">
-        <input type="password" id="adminKey" class="form-input" placeholder="••••••••" autocomplete="off" style="padding-right:36px;width:100%;">
-        <button type="button" id="toggleSenha" onclick="toggleSenhaVisivel()" title="Mostrar/ocultar senha"
-          style="position:absolute;right:0;bottom:12px;background:none;border:none;cursor:pointer;color:var(--ink-mute);padding:0;line-height:1;transition:color .2s;"
-          onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--ink-mute)'">
-          <svg id="iconOlho" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <button class="btn" id="gerarBtn" onclick="gerarLink()">
-      <span id="btnLabel">Gerar link</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </button>
-    <p class="error-msg" id="errorMsg"></p>
-  </div>
+    <h1>Área <em>interna.</em></h1>
+    <p>Clientes, projetos, contratos, agenda, financeiro e processos do estúdio.</p>
+    <label class="campo"><span>Senha de acesso</span><input class="in" type="password" id="senha" autocomplete="current-password" required></label>
+    <button class="btn btn-lg" id="btnEntrar" type="submit">Entrar</button>
+    <div class="erro" id="erroLogin" role="alert"></div>
+  </form>
+</div>
 
-  <div class="result" id="result">
-    <p class="result-label">Link gerado para <strong id="clienteLabel"></strong></p>
-    <div class="result-link" id="linkDisplay"></div>
-    <button class="copy-btn" id="copyBtn" onclick="copiarLink()">Copiar link</button>
-    <button class="new-btn" onclick="novoLink()">Gerar outro link →</button>
+<!-- ============ APP ============ -->
+<div class="app" id="telaApp" hidden>
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M23.78 8.22 A11 11 0 1 0 23.78 23.78" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="17.5" cy="16" r="3.2" fill="#c54a1a"/></svg>
+      <span>Crivo<em>&</em>Co.</span>
+    </div>
+    <nav class="menu" id="menu" aria-label="Seções"></nav>
+    <div class="rail-pe">
+      <span id="sessaoInfo"></span>
+      <button onclick="sair()">Sair</button>
+    </div>
+  </aside>
+
+  <div>
+    <div class="barra-movel">
+      <button onclick="document.getElementById('rail').classList.toggle('aberto')" aria-label="Abrir menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <div class="brand"><span>Crivo<em>&</em>Co.</span></div>
+      <span style="width:34px"></span>
+    </div>
+    <main class="main" id="view"><div class="carregando">Carregando…</div></main>
   </div>
 </div>
-<a href="/catalogo" style="margin-top:20px;font-size:14px;color:var(--ink-dim);border-bottom:1px solid var(--line);text-decoration:none;">Abrir o catálogo interno</a>
+
+<div class="veu" id="veu" onclick="fecharGaveta()"></div>
+<aside class="gaveta" id="gaveta" aria-hidden="true" role="dialog">
+  <div class="g-topo"><h2 id="gTitulo"></h2><button onclick="fecharGaveta()" aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <form class="g-corpo" id="gCorpo" onsubmit="salvarGaveta(event)"></form>
+  <div class="g-pe">
+    <button class="btn btn-perigo" id="gExcluir" type="button" onclick="excluirGaveta()">Excluir</button>
+    <div class="dir">
+      <button class="btn btn-sec" type="button" onclick="fecharGaveta()">Cancelar</button>
+      <button class="btn" id="gSalvar" type="submit" form="gCorpo">Salvar</button>
+    </div>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
-  // A API roda no Worker da Cloudflare e o site público fica na Vercel, então a
-  // chamada é absoluta. A origem da Vercel está liberada em ALLOWED_ORIGINS no
-  // wrangler.toml; servida pelo próprio Worker, a página também funciona.
+  // em `wrangler dev` a página e a API saem da mesma origem local
+  const API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? '' : 'https://crivo.crivo-worker.workers.dev';
+  const CHAVE_SESSAO = 'crivo-sessao';
 
-  // O fetch rejeita igual quando falta internet e quando o servidor está fora do ar.
-  // Sem distinguir os dois, a mensagem culpa a conexão do usuário por um problema nosso.
-  function msgFalhaRede(contexto) {
-    if (navigator.onLine === false) return 'Sem conexão. Verifique sua internet e tente de novo.';
-    return contexto;
+  // ============ ESTADO ============
+  let token = null;
+  let ESQ = null;
+  let STATUS_BRIEFING = [];
+  let D = {};            // registros por tipo
+  let BRIEFINGS = [];
+  let viewAtual = 'visao';
+  let calMes = null;     // Date no dia 1 do mês exibido
+  let finMes = null;
+  let gaveta = null;     // { tipo, registro, extra }
+
+  // ============ UTILITÁRIOS ============
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const brl = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const hoje = () => iso(new Date());
+  const fmtData = (s) => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}` : '';
+  const fmtDataLonga = (s) => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : '';
+  const diasAte = (s) => Math.round((new Date(s + 'T12:00:00') - new Date(hoje() + 'T12:00:00')) / 86400000);
+  const rotuloOpcao = (tipo, campo, v) => (ESQ[tipo].campos[campo].opcoes.find(([k]) => k === v) || [v, v])[1];
+  const nomeCliente = (id) => { const c = D.cliente?.find((x) => x.id === id); return c ? c.nome : ''; };
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+  function toast(msg, erro = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.toggle('erro-t', erro);
+    t.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.remove('on'), 2600);
   }
-  const API_BASE = 'https://crivo.crivo-worker.workers.dev';
-  let linkGerado = '';
 
-  async function gerarLink() {
-    const cliente = document.getElementById('cliente').value.trim();
-    const adminKey = document.getElementById('adminKey').value;
-    const btn = document.getElementById('gerarBtn');
-    const errorEl = document.getElementById('errorMsg');
+  function lerSessao() { try { return JSON.parse(sessionStorage.getItem(CHAVE_SESSAO) || 'null'); } catch { return null; } }
+  function gravarSessao(v) { try { v ? sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(v)) : sessionStorage.removeItem(CHAVE_SESSAO); } catch {} }
 
-    errorEl.classList.remove('show');
-
-    if (!cliente) { document.getElementById('cliente').focus(); return; }
-    if (!adminKey) { document.getElementById('adminKey').focus(); return; }
-
-    btn.disabled = true;
-    document.getElementById('btnLabel').textContent = 'Gerando...';
-
+  async function api(caminho, opcoes = {}) {
+    let res;
     try {
-      const res = await fetch(`${API_BASE}/api/tokens/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminKey, cliente }),
+      res = await fetch(API_BASE + caminho, {
+        ...opcoes,
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, ...(opcoes.headers || {}) },
       });
-      const data = await res.json();
-
-      if (!data.ok) {
-        errorEl.textContent = data.error || 'Erro ao gerar link.';
-        errorEl.classList.add('show');
-        btn.disabled = false;
-        document.getElementById('btnLabel').textContent = 'Gerar link';
-        return;
-      }
-
-      linkGerado = data.link;
-      document.getElementById('linkDisplay').textContent = data.link;
-      document.getElementById('clienteLabel').textContent = data.cliente;
-      document.getElementById('result').classList.add('show');
-      document.getElementById('formArea').style.display = 'none';
-
     } catch {
-      errorEl.textContent = msgFalhaRede('Backend fora do ar (' + location.origin + '). Não é a sua internet. Verifique o deploy.');
-      errorEl.classList.add('show');
-      btn.disabled = false;
-      document.getElementById('btnLabel').textContent = 'Gerar link';
+      throw new Error(navigator.onLine === false ? 'Sem conexão com a internet.' : 'Servidor indisponível agora. Tenta de novo em instantes.');
+    }
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 401 && caminho !== '/api/admin/login') { sair('Sessão expirada. Entre de novo.'); throw new Error('Sessão expirada.'); }
+    if (!res.ok || !body.ok) throw new Error(body.error || 'Não foi possível concluir.');
+    return body;
+  }
+
+  // ============ LOGIN ============
+  async function entrar(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnEntrar');
+    const erro = document.getElementById('erroLogin');
+    erro.textContent = '';
+    btn.disabled = true; btn.textContent = 'Entrando…';
+    try {
+      const r = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ adminKey: document.getElementById('senha').value }) });
+      document.getElementById('senha').value = '';
+      token = r.token;
+      gravarSessao({ token, expiraEm: r.expiraEm });
+      await iniciar();
+    } catch (err) {
+      erro.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Entrar';
     }
   }
 
-  function copiarLink() {
-    if (!linkGerado) return;
-    navigator.clipboard.writeText(linkGerado).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = 'Link copiado!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('copied'); }, 2000);
+  function sair(motivo) {
+    token = null; D = {}; BRIEFINGS = [];
+    gravarSessao(null);
+    fecharGaveta();
+    document.getElementById('telaApp').hidden = true;
+    document.getElementById('telaLogin').hidden = false;
+    document.getElementById('erroLogin').textContent = typeof motivo === 'string' ? motivo : '';
+  }
+
+  async function iniciar() {
+    document.getElementById('telaLogin').hidden = true;
+    document.getElementById('telaApp').hidden = false;
+    document.getElementById('view').innerHTML = '<div class="carregando">Carregando…</div>';
+    const [esq, dados] = await Promise.all([api('/api/admin/esquemas'), api('/api/admin/dados')]);
+    ESQ = esq.esquemas; STATUS_BRIEFING = esq.statusBriefing;
+    D = dados.dados; BRIEFINGS = dados.briefings;
+    const s = lerSessao();
+    if (s?.expiraEm) document.getElementById('sessaoInfo').textContent = 'Sessão até ' + new Date(s.expiraEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const hash = location.hash.slice(1);
+    ir(VIEWS[hash] ? hash : 'visao');
+  }
+
+  async function recarregar() {
+    const dados = await api('/api/admin/dados');
+    D = dados.dados; BRIEFINGS = dados.briefings;
+    render();
+  }
+
+  // ============ NAVEGAÇÃO ============
+  const ICONES = {
+    visao: '<path d="M3 12l9-8 9 8M5 10v10h14V10"/>',
+    clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c1.9.8 3.1 2.6 3.5 5.2"/>',
+    projetos: '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/>',
+    contratos: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>',
+    calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    financeiro: '<path d="M12 3v18M17 7.5c0-1.9-2.2-3-5-3s-5 1.2-5 3.3c0 4.7 10 2.5 10 7.4 0 2-2.2 3.3-5 3.3s-5-1.2-5-3"/>',
+    processos: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+    briefings: '<path d="M4 5h16v11H8l-4 4z"/>',
+    questionarios: '<path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/>',
+    catalogo: '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
+  };
+
+  const VIEWS = {
+    visao: { rotulo: 'Visão geral', render: renderVisao },
+    clientes: { rotulo: 'Clientes', render: renderClientes },
+    projetos: { rotulo: 'Projetos', render: renderProjetos },
+    contratos: { rotulo: 'Contratos', render: renderContratos },
+    calendario: { rotulo: 'Calendário', render: renderCalendario },
+    financeiro: { rotulo: 'Financeiro', render: renderFinanceiro },
+    processos: { rotulo: 'Processos', render: renderProcessos },
+    briefings: { rotulo: 'Briefings do site', render: renderBriefings },
+    questionarios: { rotulo: 'Questionários', render: renderQuestionarios },
+  };
+
+  function renderMenu() {
+    const novos = BRIEFINGS.filter((b) => b.status === 'novo').length;
+    const item = (k) => `<button class="${viewAtual === k ? 'ativo' : ''}" onclick="ir('${k}')"><svg viewBox="0 0 24 24">${ICONES[k]}</svg>${VIEWS[k].rotulo}${k === 'briefings' && novos ? `<span class="badge">${novos}</span>` : ''}</button>`;
+    document.getElementById('menu').innerHTML =
+      ['visao', 'clientes', 'projetos', 'contratos', 'calendario', 'financeiro', 'processos'].map(item).join('') +
+      '<div class="menu-titulo">Captação</div>' + ['briefings', 'questionarios'].map(item).join('') +
+      `<a href="/catalogo" target="_blank" rel="noopener"><svg viewBox="0 0 24 24">${ICONES.catalogo}</svg>Catálogo de preços</a>`;
+  }
+
+  function ir(v) {
+    viewAtual = v;
+    history.replaceState(null, '', '#' + v);
+    document.getElementById('rail').classList.remove('aberto');
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function render() {
+    renderMenu();
+    document.getElementById('view').innerHTML = VIEWS[viewAtual].render();
+    if (viewAtual === 'projetos') ligarKanban();
+  }
+
+  const topo = (titulo, sub, acoes = '') => `<div class="topo"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div><div class="acoes">${acoes}</div></div>`;
+  const vazioGrande = (titulo, texto, tipo, rotuloBtn) => `<div class="vazio-grande"><b>${titulo}</b>${texto}${tipo ? `<br><button class="btn" onclick="abrir('${tipo}')">${rotuloBtn}</button>` : ''}</div>`;
+
+  // ============ VISÃO GERAL ============
+  function itensAgenda(de, ate) {
+    const itens = [];
+    for (const e of D.evento) if (e.data >= de && e.data <= ate) itens.push({ data: e.data, t: e.titulo, v: e.hora || rotuloOpcao('evento', 'categoria', e.categoria), cls: e.categoria, abrir: `abrir('evento', ${e.id})` });
+    for (const p of D.projeto) if (p.prazo && p.etapa !== 'entregue' && p.prazo >= de && p.prazo <= ate) itens.push({ data: p.prazo, t: 'Prazo: ' + p.titulo, v: nomeCliente(p.clienteId), cls: 'prazo', abrir: `abrir('projeto', ${p.id})` });
+    for (const l of D.lancamento) if (!l.pago && l.vencimento >= de && l.vencimento <= ate) itens.push({ data: l.vencimento, t: (l.natureza === 'receita' ? 'Receber: ' : 'Pagar: ') + l.descricao, v: brl(l.valor), cls: 'financeiro', abrir: `abrir('lancamento', ${l.id})` });
+    for (const c of D.contrato) if (c.fim && c.status === 'assinado' && c.fim >= de && c.fim <= ate) itens.push({ data: c.fim, t: 'Fim de contrato: ' + c.titulo, v: nomeCliente(c.clienteId), cls: 'entrega', abrir: `abrir('contrato', ${c.id})` });
+    return itens.sort((a, b) => a.data.localeCompare(b.data));
+  }
+
+  function renderVisao() {
+    const h = hoje();
+    const mes = h.slice(0, 7);
+    const ativos = D.cliente.filter((c) => c.status === 'ativo').length;
+    const emAndamento = D.projeto.filter((p) => p.etapa !== 'entregue');
+    const atrasados = emAndamento.filter((p) => p.prazo && p.prazo < h);
+    const doMes = D.lancamento.filter((l) => l.vencimento.startsWith(mes));
+    const aReceber = doMes.filter((l) => l.natureza === 'receita' && !l.pago).reduce((s, l) => s + l.valor, 0);
+    const recebido = doMes.filter((l) => l.natureza === 'receita' && l.pago).reduce((s, l) => s + l.valor, 0);
+    const vencidos = D.lancamento.filter((l) => l.natureza === 'receita' && !l.pago && l.vencimento < h);
+    const mrr = D.contrato.filter((c) => c.status === 'assinado' && c.modalidade === 'mensal').reduce((s, c) => s + (c.valor || 0), 0);
+    const novos = BRIEFINGS.filter((b) => b.status === 'novo');
+    const ate = new Date(); ate.setDate(ate.getDate() + 14);
+    const agenda = itensAgenda(h, iso(ate));
+    const pipeline = D.cliente.filter((c) => c.status === 'lead' || c.status === 'proposta');
+
+    const linhaAgenda = (i) => `<li onclick="${i.abrir}"><span class="d">${i.data === h ? 'hoje' : fmtData(i.data)}</span><span class="t">${esc(i.t)}</span><span class="v">${esc(i.v)}</span></li>`;
+    const saud = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite';
+    const dataHoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    return topo(`${saud}, <em>equipe.</em>`, dataHoje.charAt(0).toUpperCase() + dataHoje.slice(1),
+        `<button class="btn btn-sec" onclick="abrir('evento')">+ Evento</button><button class="btn btn-sec" onclick="abrir('lancamento')">+ Lançamento</button><button class="btn" onclick="abrir('projeto')">+ Projeto</button>`) +
+      `<div class="kpis">
+        <div class="kpi destaque"><span>A receber em ${MESES[new Date().getMonth()]}</span><b class="num">${brl(aReceber)}</b><small>${brl(recebido)} já recebido</small></div>
+        <div class="kpi"><span>Receita recorrente</span><b class="num">${brl(mrr)}</b><small>contratos mensais assinados</small></div>
+        <div class="kpi"><span>Clientes ativos</span><b class="num">${ativos}</b><small>${pipeline.length} em negociação</small></div>
+        <div class="kpi"><span>Projetos em andamento</span><b class="num">${emAndamento.length}</b><small>${atrasados.length ? `<span style="color:var(--warn)">${atrasados.length} atrasado${atrasados.length > 1 ? 's' : ''}</span>` : 'nenhum atrasado'}</small></div>
+        <div class="kpi"><span>Briefings novos</span><b class="num">${novos.length}</b><small>vindos do site</small></div>
+      </div>
+      <div class="grade-2">
+        <section class="painel"><h2>Próximos 14 dias <button onclick="ir('calendario')">Ver calendário →</button></h2>
+          ${agenda.length ? `<ul class="lista-simples">${agenda.slice(0, 12).map(linhaAgenda).join('')}</ul>` : '<p class="vazio">Nada marcado. Use “+ Evento” para agendar captações, reuniões e entregas.</p>'}
+        </section>
+        <section class="painel"><h2>Precisa de atenção</h2>
+          ${(atrasados.length || vencidos.length || novos.length) ? `<ul class="lista-simples">
+            ${atrasados.map((p) => `<li onclick="abrir('projeto', ${p.id})"><span class="d" style="color:var(--warn)">${fmtData(p.prazo)}</span><span class="t">Atrasado: ${esc(p.titulo)}</span><span class="v">${esc(nomeCliente(p.clienteId))}</span></li>`).join('')}
+            ${vencidos.map((l) => `<li onclick="abrir('lancamento', ${l.id})"><span class="d" style="color:var(--warn)">${fmtData(l.vencimento)}</span><span class="t">Recebimento vencido: ${esc(l.descricao)}</span><span class="v">${brl(l.valor)}</span></li>`).join('')}
+            ${novos.map((b) => `<li onclick="ir('briefings')"><span class="d">${fmtData(b.created_at.slice(0, 10))}</span><span class="t">Briefing novo: ${esc(b.empresa)}</span><span class="v">${esc(b.nome)}</span></li>`).join('')}
+          </ul>` : '<p class="vazio">Tudo em dia.</p>'}
+        </section>
+        <section class="painel"><h2>Em produção <button onclick="ir('projetos')">Ver quadro →</button></h2>
+          ${emAndamento.length ? `<ul class="lista-simples">${emAndamento.slice(0, 8).map((p) => {
+            const t = p.tarefas || [], f = t.filter((x) => x.feito).length;
+            return `<li onclick="abrir('projeto', ${p.id})"><span class="d">${p.prazo ? fmtData(p.prazo) : '-'}</span><span class="t">${esc(p.titulo)}</span><span class="v">${t.length ? `${f}/${t.length}` : rotuloOpcao('projeto', 'etapa', p.etapa)}</span></li>`;
+          }).join('')}</ul>` : '<p class="vazio">Nenhum projeto em andamento.</p>'}
+        </section>
+        <section class="painel"><h2>Negociações <button onclick="ir('clientes')">Ver clientes →</button></h2>
+          ${pipeline.length ? `<ul class="lista-simples">${pipeline.map((c) => `<li onclick="abrir('cliente', ${c.id})"><span class="t">${esc(c.nome)}${c.empresa && c.empresa !== c.nome ? ` <span class="mute">· ${esc(c.empresa)}</span>` : ''}</span><span class="tag ${c.status === 'proposta' ? 'acc' : ''}">${rotuloOpcao('cliente', 'status', c.status)}</span></li>`).join('')}</ul>` : '<p class="vazio">Nenhuma negociação aberta.</p>'}
+        </section>
+      </div>`;
+  }
+
+  // ============ CLIENTES ============
+  const CLS_STATUS_CLIENTE = { lead: '', proposta: 'acc', ativo: 'ok', pausado: 'info', encerrado: '' };
+  let filtroCliente = { q: '', status: '' };
+
+  function renderClientes() {
+    const q = filtroCliente.q.toLowerCase();
+    const lista = D.cliente
+      .filter((c) => !filtroCliente.status || c.status === filtroCliente.status)
+      .filter((c) => !q || [c.nome, c.empresa, c.segmento, c.cidade, c.email].join(' ').toLowerCase().includes(q))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    const contagem = (s) => D.cliente.filter((c) => c.status === s).length;
+    return topo('Clientes', `${D.cliente.length} cadastrados · ${contagem('ativo')} ativos`, `<button class="btn" onclick="abrir('cliente')">+ Cliente</button>`) +
+      (D.cliente.length ? `<div class="filtros">
+        <input class="in busca" placeholder="Buscar por nome, empresa, segmento…" value="${esc(filtroCliente.q)}" oninput="filtroCliente.q=this.value; atualizarTabelaClientes()">
+        <select class="in" onchange="filtroCliente.status=this.value; render()"><option value="">Todos os status</option>${ESQ.cliente.campos.status.opcoes.map(([k, r]) => `<option value="${k}" ${filtroCliente.status === k ? 'selected' : ''}>${r} (${contagem(k)})</option>`).join('')}</select>
+      </div>
+      <div class="tabela-wrap" id="tabelaClientes">${tabelaClientes(lista)}</div>` : vazioGrande('Nenhum cliente ainda', 'Cadastre clientes para ligar projetos, contratos e recebimentos a eles.', 'cliente', '+ Cliente'));
+  }
+
+  function tabelaClientes(lista) {
+    if (!lista.length) return '<p class="vazio" style="padding:20px">Nenhum cliente com esse filtro.</p>';
+    return `<table><thead><tr><th>Cliente</th><th>Status</th><th>Segmento</th><th>Contato</th><th class="dir">Projetos</th><th class="dir">Faturado</th></tr></thead><tbody>
+      ${lista.map((c) => {
+        const projs = D.projeto.filter((p) => p.clienteId === c.id).length;
+        const fat = D.lancamento.filter((l) => l.clienteId === c.id && l.natureza === 'receita' && l.pago).reduce((s, l) => s + l.valor, 0);
+        return `<tr onclick="abrir('cliente', ${c.id})"><td><b style="font-weight:500">${esc(c.nome)}</b>${c.empresa && c.empresa !== c.nome ? `<span class="sub">${esc(c.empresa)}</span>` : ''}</td>
+          <td><span class="tag ${CLS_STATUS_CLIENTE[c.status] || ''}">${rotuloOpcao('cliente', 'status', c.status)}</span></td>
+          <td>${esc(c.segmento) || '<span class="mute">-</span>'}</td>
+          <td>${esc(c.telefone || c.email || c.instagram) || '<span class="mute">-</span>'}</td>
+          <td class="dir num">${projs}</td><td class="dir num">${fat ? brl(fat) : '<span class="mute">-</span>'}</td></tr>`;
+      }).join('')}</tbody></table>`;
+  }
+
+  function atualizarTabelaClientes() {
+    const q = filtroCliente.q.toLowerCase();
+    const lista = D.cliente
+      .filter((c) => !filtroCliente.status || c.status === filtroCliente.status)
+      .filter((c) => !q || [c.nome, c.empresa, c.segmento, c.cidade, c.email].join(' ').toLowerCase().includes(q))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    document.getElementById('tabelaClientes').innerHTML = tabelaClientes(lista);
+  }
+
+  // ============ PROJETOS (KANBAN) ============
+  let filtroProjeto = { cliente: '', resp: '' };
+
+  function renderProjetos() {
+    const etapas = ESQ.projeto.campos.etapa.opcoes;
+    const resps = [...new Set(D.projeto.map((p) => p.responsavel).filter(Boolean))].sort();
+    const lista = D.projeto
+      .filter((p) => !filtroProjeto.cliente || String(p.clienteId) === filtroProjeto.cliente)
+      .filter((p) => !filtroProjeto.resp || p.responsavel === filtroProjeto.resp);
+    const h = hoje();
+    const ordem = { alta: 0, media: 1, baixa: 2 };
+    return topo('Projetos', 'Arraste os cartões entre as colunas para mudar a etapa.', `<button class="btn" onclick="abrir('projeto')">+ Projeto</button>`) +
+      `<div class="filtros">
+        <select class="in" onchange="filtroProjeto.cliente=this.value; render()"><option value="">Todos os clientes</option>${D.cliente.map((c) => `<option value="${c.id}" ${filtroProjeto.cliente === String(c.id) ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select>
+        <select class="in" onchange="filtroProjeto.resp=this.value; render()"><option value="">Toda a equipe</option>${resps.map((r) => `<option ${filtroProjeto.resp === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>
+      </div>
+      <div class="kanban">${etapas.map(([k, rot]) => {
+        const col = lista.filter((p) => p.etapa === k).sort((a, b) => (ordem[a.prioridade] - ordem[b.prioridade]) || (a.prazo || '9').localeCompare(b.prazo || '9'));
+        return `<div class="coluna" data-etapa="${k}"><h3>${rot}<span>${col.length}</span></h3>
+          ${col.map((p) => {
+            const t = p.tarefas || [], f = t.filter((x) => x.feito).length;
+            const atrasado = p.prazo && p.prazo < h && k !== 'entregue';
+            return `<div class="cartao" draggable="true" data-id="${p.id}" onclick="abrir('projeto', ${p.id})">
+              <b>${esc(p.titulo)}</b>
+              <div class="meta">
+                ${p.clienteId ? `<span>${esc(nomeCliente(p.clienteId))}</span>` : ''}
+                ${p.prazo ? `<span class="tag ${atrasado ? 'warn' : ''}">${atrasado ? 'Atrasado · ' : ''}${fmtData(p.prazo)}</span>` : ''}
+                ${p.prioridade === 'alta' ? '<span class="tag acc">Alta</span>' : ''}
+                ${p.responsavel ? `<span>· ${esc(p.responsavel)}</span>` : ''}
+              </div>
+              ${t.length ? `<div class="progresso" title="${f} de ${t.length} tarefas"><i style="width:${Math.round(f / t.length * 100)}%"></i></div>` : ''}
+            </div>`;
+          }).join('') || '<p class="vazio" style="padding:8px 4px;font-size:13px">Vazio</p>'}
+        </div>`;
+      }).join('')}</div>`;
+  }
+
+  function ligarKanban() {
+    document.querySelectorAll('.cartao').forEach((c) => {
+      c.addEventListener('dragstart', (e) => { c.classList.add('arrastando'); e.dataTransfer.setData('text/plain', c.dataset.id); });
+      c.addEventListener('dragend', () => c.classList.remove('arrastando'));
+    });
+    document.querySelectorAll('.coluna').forEach((col) => {
+      col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('alvo'); });
+      col.addEventListener('dragleave', () => col.classList.remove('alvo'));
+      col.addEventListener('drop', async (e) => {
+        e.preventDefault(); col.classList.remove('alvo');
+        const id = Number(e.dataTransfer.getData('text/plain'));
+        const p = D.projeto.find((x) => x.id === id);
+        if (!p || p.etapa === col.dataset.etapa) return;
+        const anterior = p.etapa;
+        p.etapa = col.dataset.etapa;
+        render();
+        try { await salvarRegistro('projeto', p); toast('Movido para ' + rotuloOpcao('projeto', 'etapa', p.etapa)); }
+        catch (err) { p.etapa = anterior; render(); toast(err.message, true); }
+      });
     });
   }
 
-  function novoLink() {
-    linkGerado = '';
-    document.getElementById('cliente').value = '';
-    document.getElementById('btnLabel').textContent = 'Gerar link';
-    document.getElementById('gerarBtn').disabled = false;
-    document.getElementById('result').classList.remove('show');
-    document.getElementById('formArea').style.display = 'block';
-    document.getElementById('cliente').focus();
+  // ============ CONTRATOS ============
+  const CLS_STATUS_CONTRATO = { rascunho: '', enviado: 'acc', assinado: 'ok', encerrado: 'info', perdido: '' };
+
+  function renderContratos() {
+    const lista = [...D.contrato].sort((a, b) => (b.inicio || '').localeCompare(a.inicio || ''));
+    const assinados = D.contrato.filter((c) => c.status === 'assinado');
+    const mrr = assinados.filter((c) => c.modalidade === 'mensal').reduce((s, c) => s + (c.valor || 0), 0);
+    const h = hoje();
+    return topo('Contratos', `${assinados.length} assinados · ${brl(mrr)}/mês recorrente`, `<button class="btn" onclick="abrir('contrato')">+ Contrato</button>`) +
+      (lista.length ? `<div class="tabela-wrap"><table><thead><tr><th>Contrato</th><th>Status</th><th>Modalidade</th><th>Vigência</th><th class="dir">Valor</th><th></th></tr></thead><tbody>
+        ${lista.map((c) => {
+          const dias = c.fim ? diasAte(c.fim) : null;
+          const alerta = c.status === 'assinado' && dias !== null && dias >= 0 && dias <= 30;
+          return `<tr onclick="abrir('contrato', ${c.id})"><td><b style="font-weight:500">${esc(c.titulo)}</b><span class="sub">${esc(nomeCliente(c.clienteId)) || 'Sem cliente'}</span></td>
+            <td><span class="tag ${CLS_STATUS_CONTRATO[c.status] || ''}">${rotuloOpcao('contrato', 'status', c.status)}</span></td>
+            <td>${rotuloOpcao('contrato', 'modalidade', c.modalidade)}</td>
+            <td>${c.inicio ? fmtDataLonga(c.inicio) : '-'}${c.fim ? ' até ' + fmtDataLonga(c.fim) : ''}${alerta ? `<span class="sub" style="color:var(--accent)">vence em ${dias} dia${dias === 1 ? '' : 's'}</span>` : ''}${c.status === 'assinado' && c.fim && c.fim < h ? '<span class="sub" style="color:var(--warn)">vencido</span>' : ''}</td>
+            <td class="dir num">${c.valor ? brl(c.valor) + (c.modalidade === 'mensal' ? '/mês' : '') : '-'}</td>
+            <td class="dir">${c.documentoUrl ? `<a href="${esc(c.documentoUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="tag">Abrir doc ↗</a>` : ''}</td></tr>`;
+        }).join('')}</tbody></table></div>` : vazioGrande('Nenhum contrato ainda', 'Registre propostas enviadas e contratos assinados, com valor, vigência e link do documento.', 'contrato', '+ Contrato'));
   }
 
-  function toggleSenhaVisivel() {
-    const input = document.getElementById('adminKey');
-    const icon = document.getElementById('iconOlho');
-    const visivel = input.type === 'text';
-    input.type = visivel ? 'password' : 'text';
-    icon.innerHTML = visivel
-      ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-      : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>' +
-        '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>' +
-        '<line x1="1" y1="1" x2="23" y2="23"/>';
+  // ============ CALENDÁRIO ============
+  function renderCalendario() {
+    if (!calMes) { const d = new Date(); calMes = new Date(d.getFullYear(), d.getMonth(), 1); }
+    const ano = calMes.getFullYear(), mes = calMes.getMonth();
+    const inicio = new Date(ano, mes, 1 - ((new Date(ano, mes, 1).getDay() + 6) % 7)); // semana começa na segunda
+    const dias = [];
+    for (let i = 0; i < 42; i++) { const d = new Date(inicio); d.setDate(inicio.getDate() + i); dias.push(d); }
+    if (dias[35].getMonth() !== mes) dias.length = 35;
+    const itens = itensAgenda(iso(dias[0]), iso(dias[dias.length - 1]));
+    const h = hoje();
+    return topo('Calendário', 'Eventos, prazos de projeto, vencimentos e fim de contratos num lugar só.',
+        `<div class="cal-nav"><button class="btn btn-sec" onclick="mudarMes(-1)" aria-label="Mês anterior">←</button><b>${MESES[mes]} ${ano}</b><button class="btn btn-sec" onclick="mudarMes(1)" aria-label="Próximo mês">→</button><button class="btn btn-sec" onclick="calMes=null; render()">Hoje</button></div><button class="btn" onclick="abrir('evento')">+ Evento</button>`) +
+      `<div class="cal">${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map((d) => `<div class="dow">${d}</div>`).join('')}
+        ${dias.map((d) => {
+          const s = iso(d);
+          const doDia = itens.filter((i) => i.data === s);
+          return `<div class="dia ${d.getMonth() !== mes ? 'fora' : ''} ${s === h ? 'hoje' : ''}" onclick="abrir('evento', null, { data: '${s}' })">
+            <span class="n">${d.getDate()}</span>
+            ${doDia.slice(0, 4).map((i) => `<button class="item-cal ${i.cls}" onclick="event.stopPropagation(); ${i.abrir}" title="${esc(i.t)}">${esc(i.t)}</button>`).join('')}
+            ${doDia.length > 4 ? `<span class="mute" style="font-size:12px">+${doDia.length - 4}</span>` : ''}
+          </div>`;
+        }).join('')}</div>
+      <div class="legenda"><span class="tag acc">Captação</span><span class="tag info">Reunião</span><span class="tag warn">Entrega / prazo</span><span class="tag ok">Financeiro</span><span class="tag" style="background:var(--ink);color:var(--bg)">Feira / evento</span><span class="mute" style="font-size:13px">Clique num dia para criar um evento.</span></div>`;
+  }
+  function mudarMes(n) { calMes = new Date(calMes.getFullYear(), calMes.getMonth() + n, 1); render(); }
+
+  // ============ FINANCEIRO ============
+  function renderFinanceiro() {
+    if (!finMes) finMes = hoje().slice(0, 7);
+    const [a, m] = finMes.split('-').map(Number);
+    const lista = D.lancamento.filter((l) => l.vencimento.startsWith(finMes)).sort((x, y) => x.vencimento.localeCompare(y.vencimento));
+    const soma = (f) => lista.filter(f).reduce((s, l) => s + l.valor, 0);
+    const receitas = soma((l) => l.natureza === 'receita');
+    const recebido = soma((l) => l.natureza === 'receita' && l.pago);
+    const despesas = soma((l) => l.natureza === 'despesa');
+    const h = hoje();
+    const vencidosGeral = D.lancamento.filter((l) => l.natureza === 'receita' && !l.pago && l.vencimento < h);
+    return topo('Financeiro', 'Receitas e despesas por mês de vencimento.',
+        `<div class="cal-nav"><button class="btn btn-sec" onclick="mudarFin(-1)" aria-label="Mês anterior">←</button><b>${MESES[m - 1]} ${a}</b><button class="btn btn-sec" onclick="mudarFin(1)" aria-label="Próximo mês">→</button></div><button class="btn" onclick="abrir('lancamento')">+ Lançamento</button>`) +
+      `<div class="kpis">
+        <div class="kpi"><span>Receitas previstas</span><b class="num valor-receita">${brl(receitas)}</b><small>${brl(recebido)} recebido</small></div>
+        <div class="kpi"><span>A receber</span><b class="num">${brl(receitas - recebido)}</b><small>${vencidosGeral.length ? `<span style="color:var(--warn)">${vencidosGeral.length} vencido${vencidosGeral.length > 1 ? 's' : ''} no total</span>` : 'nada vencido'}</small></div>
+        <div class="kpi"><span>Despesas</span><b class="num valor-despesa">${brl(despesas)}</b><small>${brl(soma((l) => l.natureza === 'despesa' && l.pago))} pago</small></div>
+        <div class="kpi destaque"><span>Resultado previsto</span><b class="num">${brl(receitas - despesas)}</b><small>receitas menos despesas</small></div>
+      </div>` +
+      (lista.length ? `<div class="tabela-wrap"><table><thead><tr><th></th><th>Descrição</th><th>Vencimento</th><th>Categoria</th><th class="dir">Valor</th></tr></thead><tbody>
+        ${lista.map((l) => `<tr class="fin-linha" onclick="abrir('lancamento', ${l.id})">
+          <td><button class="check ${l.pago ? 'on' : ''}" onclick="event.stopPropagation(); alternarPago(${l.id})" aria-label="${l.pago ? 'Marcar como pendente' : 'Marcar como pago'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button></td>
+          <td><b style="font-weight:500">${esc(l.descricao)}</b><span class="sub">${esc(nomeCliente(l.clienteId))}</span></td>
+          <td>${fmtDataLonga(l.vencimento)}${!l.pago && l.vencimento < h ? '<span class="sub" style="color:var(--warn)">vencido</span>' : ''}</td>
+          <td>${esc(l.categoria) || '<span class="mute">-</span>'}</td>
+          <td class="dir num ${l.natureza === 'receita' ? 'valor-receita' : 'valor-despesa'}">${l.natureza === 'despesa' ? '− ' : ''}${brl(l.valor)}</td></tr>`).join('')}
+      </tbody></table></div>` : vazioGrande('Nada neste mês', 'Lance parcelas de projetos, mensalidades e despesas do estúdio.', 'lancamento', '+ Lançamento'));
+  }
+  function mudarFin(n) { const [a, m] = finMes.split('-').map(Number); const d = new Date(a, m - 1 + n, 1); finMes = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; render(); }
+  async function alternarPago(id) {
+    const l = D.lancamento.find((x) => x.id === id);
+    l.pago = !l.pago; render();
+    try { await salvarRegistro('lancamento', l); toast(l.pago ? 'Marcado como pago' : 'Marcado como pendente'); }
+    catch (err) { l.pago = !l.pago; render(); toast(err.message, true); }
   }
 
-  // Enter para submeter
-  ['cliente', 'adminKey'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') gerarLink();
-    });
-  });
+  // ============ PROCESSOS ============
+  function renderProcessos() {
+    const areas = ESQ.processo.campos.area.opcoes;
+    return topo('Processos', 'Como a Crivo faz cada coisa. Use um processo como checklist de um projeto novo.', `<button class="btn" onclick="abrir('processo')">+ Processo</button>`) +
+      (D.processo.length ? areas.filter(([k]) => D.processo.some((p) => p.area === k)).map(([k, rot]) => `
+        <h2 style="font-family:var(--serif);font-weight:400;font-size:22px;margin:22px 0 12px">${rot}</h2>
+        <div class="grade-cards">${D.processo.filter((p) => p.area === k).map((p) => `
+          <div class="proc" onclick="abrir('processo', ${p.id})">
+            <b>${esc(p.titulo)}</b><p>${esc(p.descricao)}</p>
+            <div class="meta"><span>${(p.passos || []).length} passos</span><button class="tag acc" onclick="event.stopPropagation(); usarProcesso(${p.id})">Usar em projeto →</button></div>
+          </div>`).join('')}</div>`).join('')
+      : vazioGrande('Nenhum processo ainda', 'Documente o passo a passo de onboarding, produção, captação e entregas.', 'processo', '+ Processo'));
+  }
+  function usarProcesso(id) {
+    const p = D.processo.find((x) => x.id === id);
+    abrir('projeto', null, { titulo: p.titulo, tarefas: (p.passos || []).map((s) => ({ texto: s.texto, feito: false })), descricao: 'Criado a partir do processo “' + p.titulo + '”.' });
+  }
+
+  // ============ BRIEFINGS ============
+  const ROT_BRIEFING = { novo: 'Novo', contato: 'Em contato', proposta: 'Proposta enviada', fechado: 'Fechou', descartado: 'Descartado' };
+  const CLS_BRIEFING = { novo: 'acc', contato: 'info', proposta: 'acc', fechado: 'ok', descartado: '' };
+  const SERVICOS = { branding: 'Branding & identidade', conteudo: 'Conteúdo & redes', midia: 'Mídia & performance', web: 'Site / landing page', combo: 'Combo', naosei: 'Ainda não sabe' };
+
+  function renderBriefings() {
+    return topo('Briefings do site', 'O que chega pelo formulário da landing.', '') +
+      (BRIEFINGS.length ? `<div class="grade-cards" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr))">${BRIEFINGS.map((b) => `
+        <div class="painel">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:start;margin-bottom:8px">
+            <div><b style="font-family:var(--serif);font-weight:400;font-size:20px">${esc(b.empresa)}</b><div class="mute" style="font-size:13px">${esc(b.nome)} · ${fmtDataLonga(b.created_at.slice(0, 10))}</div></div>
+            <span class="tag ${CLS_BRIEFING[b.status] || ''}">${ROT_BRIEFING[b.status] || esc(b.status)}</span>
+          </div>
+          <p style="font-size:13.5px;margin-bottom:6px"><span class="tag">${SERVICOS[b.servico] || esc(b.servico)}</span></p>
+          <p style="font-size:14px;color:var(--ink-dim);white-space:pre-wrap;margin-bottom:10px">${esc(b.mensagem)}</p>
+          <p style="font-size:13.5px"><a href="mailto:${esc(b.email)}">${esc(b.email)}</a> · <a href="https://wa.me/55${esc(String(b.telefone).replace(/\D/g, ''))}" target="_blank" rel="noopener">${esc(b.telefone)}</a></p>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <select class="in" style="width:auto;padding:7px 30px 7px 10px" onchange="statusBriefing(${b.id}, this.value)">${STATUS_BRIEFING.map((s) => `<option value="${s}" ${b.status === s ? 'selected' : ''}>${ROT_BRIEFING[s]}</option>`).join('')}</select>
+            <button class="btn btn-sec" onclick="briefingParaCliente(${b.id})">Criar cliente</button>
+          </div>
+        </div>`).join('')}</div>` : vazioGrande('Nenhum briefing ainda', 'Quando alguém preencher o formulário do site, aparece aqui.'));
+  }
+  async function statusBriefing(id, status) {
+    try { await api(`/api/admin/briefings/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }); BRIEFINGS.find((b) => b.id === id).status = status; render(); toast('Status atualizado'); }
+    catch (err) { toast(err.message, true); }
+  }
+  function briefingParaCliente(id) {
+    const b = BRIEFINGS.find((x) => x.id === id);
+    abrir('cliente', null, { nome: b.nome, empresa: b.empresa, email: b.email, telefone: b.telefone, origem: 'site', status: 'lead', notas: `Briefing do site (${fmtDataLonga(b.created_at.slice(0, 10))}), serviço: ${SERVICOS[b.servico] || b.servico}.\n\n${b.mensagem}` });
+  }
+
+  // ============ QUESTIONÁRIOS ============
+  function renderQuestionarios() {
+    return topo('Questionários', 'Gere o link do diagnóstico para o cliente responder. O link vale por 30 dias.', '') +
+      `<div class="painel" style="max-width:560px">
+        <form onsubmit="gerarLink(event)" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+          <label class="campo" style="flex:1;min-width:220px"><span>Nome do cliente</span>
+            <input class="in" id="qCliente" list="qClientes" required placeholder="Ex.: RCI Transmission"></label>
+          <datalist id="qClientes">${D.cliente.map((c) => `<option value="${esc(c.empresa || c.nome)}">`).join('')}</datalist>
+          <button class="btn" id="qBtn" type="submit">Gerar link</button>
+        </form>
+        <div id="qResultado"></div>
+      </div>`;
+  }
+  async function gerarLink(e) {
+    e.preventDefault();
+    const btn = document.getElementById('qBtn');
+    btn.disabled = true;
+    try {
+      const r = await api('/api/admin/questionario-link', { method: 'POST', body: JSON.stringify({ cliente: document.getElementById('qCliente').value }) });
+      document.getElementById('qResultado').innerHTML = `<div class="link-box" id="qLink">${esc(r.link)}</div><button class="btn btn-sec" onclick="copiar(document.getElementById('qLink').textContent)">Copiar link</button>`;
+    } catch (err) { toast(err.message, true); }
+    finally { btn.disabled = false; }
+  }
+  async function copiar(texto) {
+    try { await navigator.clipboard.writeText(texto); toast('Copiado'); } catch { toast('Não deu para copiar neste navegador.', true); }
+  }
+
+  // ============ GAVETA (FORMULÁRIO GENÉRICO) ============
+  function abrir(tipo, id = null, extra = {}) {
+    const registro = id ? D[tipo].find((x) => x.id === id) : null;
+    gaveta = { tipo, registro };
+    const esq = ESQ[tipo];
+    const valores = { ...(registro || {}), ...(registro ? {} : extra) };
+    document.getElementById('gTitulo').textContent = registro ? (registro[esq.titulo] || esq.rotulo) : 'Novo ' + esq.rotulo.toLowerCase();
+    document.getElementById('gExcluir').hidden = !registro;
+
+    const LARGOS = new Set(['longo', 'lista']);
+    let html = '';
+    for (const [nome, def] of Object.entries(esq.campos)) {
+      let v = valores[nome];
+      if (v === undefined && def.padrao) v = def.padrao;
+      const larga = LARGOS.has(def.t) || nome === esq.titulo ? 'larga' : '';
+      const req = def.req ? 'required' : '';
+      let ctrl;
+      switch (def.t) {
+        case 'enum': ctrl = `<select class="in" name="${nome}">${def.opcoes.map(([k, r]) => `<option value="${k}" ${v === k ? 'selected' : ''}>${r}</option>`).join('')}</select>`; break;
+        case 'ref': ctrl = `<select class="in" name="${nome}"><option value="">Nenhum</option>${D[def.ref].slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((c) => `<option value="${c.id}" ${v === c.id ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select>`; break;
+        case 'num': ctrl = `<input class="in num" name="${nome}" type="number" min="0" step="0.01" inputmode="decimal" value="${v ?? ''}" ${req}>`; break;
+        case 'data': ctrl = `<input class="in" name="${nome}" type="date" value="${esc(v || '')}" ${req}>`; break;
+        case 'hora': ctrl = `<input class="in" name="${nome}" type="time" value="${esc(v || '')}">`; break;
+        case 'url': ctrl = `<input class="in" name="${nome}" type="url" placeholder="https://" value="${esc(v || '')}">`; break;
+        case 'longo': ctrl = `<textarea class="in" name="${nome}" rows="4">${esc(v || '')}</textarea>`; break;
+        case 'bool': html += `<label class="toggle ${larga}"><input type="checkbox" name="${nome}" ${v ? 'checked' : ''}> ${def.rotulo}</label>`; continue;
+        case 'lista': ctrl = `<div class="checklist" data-lista="${nome}">${(v || []).map((i) => itemLista(i)).join('')}<button type="button" class="add-item" onclick="addItemLista(this)">+ Adicionar item</button></div>`; break;
+        default: ctrl = `<input class="in" name="${nome}" value="${esc(v || '')}" maxlength="${def.max || 300}" ${req}>`;
+      }
+      html += `<label class="campo ${larga}"><span>${def.rotulo}${def.req ? ' *' : ''}</span>${ctrl}</label>`;
+    }
+    if (registro) html += relacionados(tipo, registro);
+    document.getElementById('gCorpo').innerHTML = html;
+    document.getElementById('veu').classList.add('aberto');
+    const g = document.getElementById('gaveta');
+    g.classList.add('aberta'); g.setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.querySelector('#gCorpo .in')?.focus(), 250);
+  }
+
+  function itemLista(i = { texto: '', feito: false }) {
+    return `<div class="item ${i.feito ? 'feito' : ''}"><input type="checkbox" ${i.feito ? 'checked' : ''} onchange="this.parentElement.classList.toggle('feito', this.checked)" aria-label="Concluído"><input class="in" value="${esc(i.texto)}" placeholder="Descreva o item"><button type="button" class="rm" onclick="this.parentElement.remove()" aria-label="Remover">×</button></div>`;
+  }
+  function addItemLista(btn) {
+    btn.insertAdjacentHTML('beforebegin', itemLista());
+    btn.previousElementSibling.querySelector('.in').focus();
+  }
+
+  function relacionados(tipo, r) {
+    if (tipo !== 'cliente') return '';
+    const projs = D.projeto.filter((p) => p.clienteId === r.id);
+    const conts = D.contrato.filter((c) => c.clienteId === r.id);
+    const lancs = D.lancamento.filter((l) => l.clienteId === r.id).sort((a, b) => b.vencimento.localeCompare(a.vencimento));
+    const fat = lancs.filter((l) => l.natureza === 'receita' && l.pago).reduce((s, l) => s + l.valor, 0);
+    const bloco = (titulo, itens, linha) => `<h3>${titulo}</h3>${itens.length ? `<ul class="lista-simples">${itens.map(linha).join('')}</ul>` : '<p class="mute" style="font-size:13.5px">Nenhum.</p>'}`;
+    return `<div class="relacionados">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-family:var(--serif);font-weight:400;font-size:18px">Histórico</b><span class="mute" style="font-size:13px">Faturado: ${brl(fat)}</span></div>
+      ${bloco('Projetos', projs, (p) => `<li onclick="abrir('projeto', ${p.id})"><span class="t">${esc(p.titulo)}</span><span class="v">${rotuloOpcao('projeto', 'etapa', p.etapa)}</span></li>`)}
+      ${bloco('Contratos', conts, (c) => `<li onclick="abrir('contrato', ${c.id})"><span class="t">${esc(c.titulo)}</span><span class="v">${rotuloOpcao('contrato', 'status', c.status)}</span></li>`)}
+      ${bloco('Lançamentos', lancs.slice(0, 8), (l) => `<li onclick="abrir('lancamento', ${l.id})"><span class="d">${fmtData(l.vencimento)}</span><span class="t">${esc(l.descricao)}</span><span class="v">${l.pago ? '✓ ' : ''}${brl(l.valor)}</span></li>`)}
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button type="button" class="btn btn-sec" onclick="abrir('projeto', null, { clienteId: ${r.id} })">+ Projeto</button>
+        <button type="button" class="btn btn-sec" onclick="abrir('contrato', null, { clienteId: ${r.id} })">+ Contrato</button>
+        <button type="button" class="btn btn-sec" onclick="abrir('lancamento', null, { clienteId: ${r.id} })">+ Lançamento</button>
+      </div>
+    </div>`;
+  }
+
+  function lerGaveta() {
+    const form = document.getElementById('gCorpo');
+    const esq = ESQ[gaveta.tipo];
+    const dados = {};
+    for (const [nome, def] of Object.entries(esq.campos)) {
+      if (def.t === 'lista') {
+        dados[nome] = [...form.querySelectorAll(`[data-lista="${nome}"] .item`)].map((el) => ({ texto: el.querySelector('.in').value, feito: el.querySelector('input[type=checkbox]').checked }));
+      } else if (def.t === 'bool') {
+        dados[nome] = form.elements[nome].checked;
+      } else {
+        const v = form.elements[nome].value;
+        dados[nome] = def.t === 'ref' ? (v ? Number(v) : null) : def.t === 'num' ? (v === '' ? null : Number(v)) : v;
+      }
+    }
+    return dados;
+  }
+
+  async function salvarRegistro(tipo, registro) {
+    const campos = Object.keys(ESQ[tipo].campos);
+    const corpo = Object.fromEntries(campos.map((k) => [k, registro[k]]));
+    const r = registro.id
+      ? await api(`/api/admin/registros/${tipo}/${registro.id}`, { method: 'PUT', body: JSON.stringify(corpo) })
+      : await api(`/api/admin/registros/${tipo}`, { method: 'POST', body: JSON.stringify(corpo) });
+    const lista = D[tipo];
+    const i = lista.findIndex((x) => x.id === r.registro.id);
+    if (i >= 0) lista[i] = r.registro; else lista.unshift(r.registro);
+    return r.registro;
+  }
+
+  async function salvarGaveta(e) {
+    e.preventDefault();
+    const btn = document.getElementById('gSalvar');
+    btn.disabled = true; btn.textContent = 'Salvando…';
+    try {
+      const dados = lerGaveta();
+      if (gaveta.registro) dados.id = gaveta.registro.id;
+      await salvarRegistro(gaveta.tipo, dados);
+      toast(ESQ[gaveta.tipo].rotulo + ' salvo');
+      fecharGaveta();
+      render();
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Salvar';
+    }
+  }
+
+  async function excluirGaveta() {
+    const { tipo, registro } = gaveta;
+    if (!registro) return;
+    if (!confirm(`Excluir “${registro[ESQ[tipo].titulo]}”? Não dá para desfazer.`)) return;
+    try {
+      await api(`/api/admin/registros/${tipo}/${registro.id}`, { method: 'DELETE' });
+      D[tipo] = D[tipo].filter((x) => x.id !== registro.id);
+      toast('Excluído');
+      fecharGaveta();
+      render();
+    } catch (err) { toast(err.message, true); }
+  }
+
+  function fecharGaveta() {
+    gaveta = null;
+    document.getElementById('veu').classList.remove('aberto');
+    const g = document.getElementById('gaveta');
+    g.classList.remove('aberta'); g.setAttribute('aria-hidden', 'true');
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && gaveta) fecharGaveta(); });
+
+  // ============ ARRANQUE ============
+  (function () {
+    const s = lerSessao();
+    if (s?.token && s.expiraEm > Date.now()) {
+      token = s.token;
+      iniciar().catch((err) => sair(err.message));
+    }
+  })();
 </script>
 </body>
 </html>

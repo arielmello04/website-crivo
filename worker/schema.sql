@@ -37,3 +37,16 @@ CREATE TABLE IF NOT EXISTS catalogo (
   dados         TEXT NOT NULL,
   atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Painel interno: clientes, projetos, contratos, eventos, lançamentos e
+-- processos. Uma tabela só, com o registro em JSON: o volume é pequeno, os
+-- campos mudam com o uso, e a validação de cada tipo vive em src/admin.js.
+CREATE TABLE IF NOT EXISTS registros (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  tipo          TEXT NOT NULL,
+  dados         TEXT NOT NULL,
+  criado_em     TEXT NOT NULL DEFAULT (datetime('now')),
+  atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_registros_tipo ON registros(tipo);

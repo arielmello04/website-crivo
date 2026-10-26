@@ -76,3 +76,6 @@ export async function validateToken(token, secret) {
     return null;
   }
 }
+
+// usados também pela sessão do painel interno (admin.js)
+export { assinar, b64urlEncode, b64urlDecode, comparaSeguro };

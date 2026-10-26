@@ -5,6 +5,7 @@ import { briefingSchema } from './validation.js';
 import { notifyNewBriefing, notifyQuestionario } from './mailer.js';
 import { createToken, validateToken } from './tokens.js';
 import { checarLimite, limparExpirados } from './ratelimit.js';
+import { registrarAdmin } from './admin.js';
 
 const app = new Hono();
 
@@ -15,6 +16,7 @@ const LIMITES = {
   questionario:{ janelaMs: 15 * MIN, max: 5 },
   // conta toda tentativa, certa ou errada: segura chute de senha
   catalogo:    { janelaMs: 15 * MIN, max: 10 },
+  login:       { janelaMs: 15 * MIN, max: 10 },
 };
 
 // ============ MIDDLEWARES ============
@@ -51,8 +53,8 @@ function cabecalhosCors(origin) {
   if (!origin) return {};
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type,x-admin-token',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,x-admin-token,Authorization',
     'Vary': 'Origin',
   };
 }
@@ -62,9 +64,10 @@ function ipDoCliente(c) {
 }
 
 // Corpo limitado a 10kb, igual ao express.json({ limit: '10kb' }) original.
-async function lerJson(c) {
+// O painel interno passa um limite maior para processos com muitos passos.
+async function lerJson(c, limite = 10 * 1024) {
   const tamanho = Number(c.req.header('Content-Length') || 0);
-  if (tamanho > 10 * 1024) return { erro: 'Corpo grande demais' };
+  if (tamanho > limite) return { erro: 'Corpo grande demais' };
   try {
     return { body: await c.req.json() };
   } catch {
@@ -261,6 +264,9 @@ app.post('/api/catalogo', async (c) => {
   c.header('Cache-Control', 'no-store');
   return c.json({ ok: true, catalogo });
 });
+
+// === /api/admin/* — painel interno (login, sessão e registros) ===
+registrarAdmin(app, { limitar, lerJson });
 
 // 404. Chamada de API responde JSON, como antes. Já um caminho de página que
 // não casou com nenhum asset recebe o 404.html — senão o visitante que errasse
