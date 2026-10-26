@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crivo · Catálogo interno</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1614'/%3E%3Cpath d='M22.36 9.64A9 9 0 1 0 22.36 22.36' fill='none' stroke='%23f5f1ea' stroke-width='3.2' stroke-linecap='round'/%3E%3Ccircle cx='17.2' cy='16' r='2.8' fill='%23c54a1a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* O catálogo não vive neste arquivo: o repositório é público. A página só
+     pede a senha e busca os dados na rota protegida /api/catalogo do Worker. */
+  :root {
+    --bg: #f5f1ea; --bg-2: #ece6db; --bg-3: #e2dbcc;
+    --ink: #1a1614; --ink-dim: #4a4540; --ink-mute: #8a847b;
+    --line: #d4ccbe; --accent: #c54a1a; --warn: #8b1e1e;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --pad: clamp(16px, 4vw, 56px);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { text-wrap: balance; font-weight: 400; }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; background: none; border: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ============ TOPO ============ */
+  .top {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 18px var(--pad); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(245, 241, 234, 0.9); backdrop-filter: blur(10px);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 20px; letter-spacing: -0.02em; }
+  .logo svg { width: 26px; height: 26px; }
+  .logo em { color: var(--accent); }
+  .top-tag { font-size: 13px; color: var(--ink-mute); }
+  .top-actions { display: flex; gap: 8px; }
+  .btn-ghost {
+    font-size: 14px; font-weight: 500; padding: 8px 14px;
+    border: 1px solid var(--line); border-radius: 8px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  /* ============ LOGIN ============ */
+  .login { min-height: calc(100dvh - 70px); display: grid; place-items: center; padding: 32px var(--pad); }
+  .login-card { width: 100%; max-width: 420px; background: var(--bg-2); border-radius: 14px; padding: 40px 36px; }
+  .login-card h1 { font-family: var(--serif); font-size: 36px; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .login-card h1 em { color: var(--accent); }
+  .login-card p { color: var(--ink-dim); font-size: 15px; margin-bottom: 28px; }
+  .field-label { display: block; font-size: 14px; font-weight: 500; color: var(--ink-dim); margin-bottom: 6px; }
+  .field {
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 13px 14px; font-size: 16px; outline: none; transition: border-color 0.2s;
+  }
+  .field:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; margin-top: 16px; padding: 15px; border-radius: 10px;
+    background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 500;
+    transition: background 0.25s, transform 0.15s;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent); }
+  .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .erro { margin-top: 14px; font-size: 14px; color: var(--warn); min-height: 1.5em; }
+
+  /* ============ CATÁLOGO ============ */
+  .app { display: none; }
+  .app.show { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 48px; padding: 40px var(--pad) 96px; max-width: 1440px; margin: 0 auto; align-items: start; }
+  .intro h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 6vw, 72px); line-height: 1; letter-spacing: -0.03em; }
+  .intro h1 em { font-style: italic; color: var(--accent); }
+  .intro p { color: var(--ink-mute); font-size: 14px; margin-top: 14px; }
+  .nav-sec { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 28px 0 8px; font-size: 15px; color: var(--ink-dim); }
+  .nav-sec a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s, color 0.2s; }
+  .nav-sec a:hover { color: var(--ink); border-color: var(--ink); }
+
+  section { padding-top: 56px; scroll-margin-top: 80px; }
+  .sec-label { display: flex; align-items: baseline; gap: 12px; font-size: 15px; font-weight: 500; color: var(--ink-dim); margin-bottom: 18px; }
+  .sec-label span { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--accent); }
+  .sec-title { font-family: var(--serif); font-size: 32px; letter-spacing: -0.02em; margin-bottom: 20px; }
+
+  /* plano e projetos */
+  .oferta { background: var(--bg-2); border-radius: 14px; padding: 32px; margin-bottom: 20px; }
+  .oferta-head { display: flex; justify-content: space-between; gap: 24px; align-items: start; flex-wrap: wrap; margin-bottom: 20px; }
+  .oferta-sub { font-size: 14px; color: var(--ink-mute); }
+  .oferta h3 { font-family: var(--serif); font-size: 30px; letter-spacing: -0.02em; line-height: 1.1; }
+  .preco { text-align: right; }
+  .preco b { font-family: var(--serif); font-weight: 400; font-size: 40px; letter-spacing: -0.02em; line-height: 1; }
+  .preco small { display: block; font-size: 14px; color: var(--ink-mute); margin-top: 4px; }
+  .oferta-resumo { color: var(--ink-dim); max-width: 64ch; margin-bottom: 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .chip { font-size: 13px; padding: 5px 10px; border-radius: 6px; background: var(--bg); color: var(--ink-dim); }
+  .inclusos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 32px; }
+  .inclusos div { border-top: 1px solid var(--line); padding-top: 12px; font-size: 15px; color: var(--ink-dim); }
+  .inclusos strong { display: block; color: var(--ink); font-weight: 500; margin-bottom: 2px; }
+  .lista { list-style: none; columns: 2; column-gap: 32px; }
+  .lista li { break-inside: avoid; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; color: var(--ink-dim); }
+  .nota { margin-top: 20px; font-size: 14px; color: var(--ink-mute); }
+  .nota b { color: var(--ink-dim); font-weight: 500; }
+
+  /* tabelas de avulsos */
+  .grupo { margin-bottom: 36px; }
+  .grupo h3 { font-family: var(--serif); font-style: italic; font-size: 22px; margin-bottom: 8px; }
+  .linha {
+    display: grid; grid-template-columns: minmax(0, 1fr) 170px 130px 44px; gap: 16px; align-items: center;
+    padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px;
+  }
+  .linha .prazo { color: var(--ink-mute); font-size: 14px; }
+  .linha .valor { text-align: right; font-weight: 500; }
+  .add {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line);
+    display: grid; place-items: center; font-size: 18px; line-height: 1;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  }
+  .add:hover { border-color: var(--ink); }
+  .add:active { transform: scale(0.94); }
+  .add.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .oferta .add { width: auto; height: auto; padding: 9px 14px; font-size: 14px; font-weight: 500; margin-top: 12px; }
+
+  .bloco { border-left: 2px solid var(--accent); padding: 4px 0 4px 18px; margin-bottom: 20px; max-width: 70ch; }
+  .bloco strong { display: block; font-weight: 500; margin-bottom: 4px; }
+  .bloco p { color: var(--ink-dim); font-size: 15px; }
+  .condicoes { list-style: none; max-width: 70ch; }
+  .condicoes li { padding: 10px 0; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 15px; }
+
+  /* ============ MONTADOR ============ */
+  .montador {
+    position: sticky; top: 92px;
+    background: var(--ink); color: var(--bg); border-radius: 14px; padding: 28px 24px;
+  }
+  .montador h2 { font-family: var(--serif); font-size: 24px; margin-bottom: 4px; }
+  .montador > p { font-size: 14px; color: rgba(245, 241, 234, 0.6); margin-bottom: 18px; }
+  .cliente { width: 100%; background: rgba(245, 241, 234, 0.08); border: 1px solid rgba(245, 241, 234, 0.18); border-radius: 8px; padding: 10px 12px; font-size: 15px; color: var(--bg); outline: none; margin-bottom: 16px; }
+  .cliente::placeholder { color: rgba(245, 241, 234, 0.45); }
+  .cliente:focus { border-color: var(--accent); }
+  .itens { list-style: none; max-height: 38vh; overflow: auto; margin-bottom: 8px; }
+  .itens li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 0; border-top: 1px solid rgba(245, 241, 234, 0.14); font-size: 14px; }
+  .itens .qtd { display: flex; align-items: center; gap: 6px; grid-column: 1; color: rgba(245, 241, 234, 0.6); font-size: 13px; }
+  .itens .qtd button { width: 24px; height: 24px; border-radius: 6px; background: rgba(245, 241, 234, 0.1); color: var(--bg); }
+  .itens .qtd button:hover { background: rgba(245, 241, 234, 0.2); }
+  .itens .sub { grid-row: 1 / span 2; grid-column: 2; text-align: right; align-self: center; }
+  .vazio { font-size: 14px; color: rgba(245, 241, 234, 0.5); padding: 14px 0; border-top: 1px solid rgba(245, 241, 234, 0.14); }
+  .totais { border-top: 1px solid rgba(245, 241, 234, 0.3); padding-top: 14px; margin-top: 6px; }
+  .tot { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 14px; color: rgba(245, 241, 234, 0.7); }
+  .tot b { font-family: var(--serif); font-weight: 400; font-size: 26px; color: var(--bg); }
+  .urgencia { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(245, 241, 234, 0.7); margin: 12px 0 4px; cursor: pointer; }
+  .urgencia input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .m-acoes { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 16px; }
+  .m-acoes .copiar { padding: 12px; border-radius: 8px; background: var(--accent); color: var(--bg); font-weight: 500; font-size: 15px; transition: filter 0.2s; }
+  .m-acoes .copiar:hover { filter: brightness(1.08); }
+  .m-acoes .limpar { padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(245, 241, 234, 0.25); font-size: 14px; color: rgba(245, 241, 234, 0.8); }
+  .feito { font-size: 13px; color: rgba(245, 241, 234, 0.7); min-height: 1.4em; margin-top: 8px; }
+
+  @media (max-width: 1080px) {
+    .app.show { grid-template-columns: 1fr; }
+    .montador { position: static; }
+  }
+  @media (max-width: 640px) {
+    .top-tag { display: none; }
+    .inclusos { grid-template-columns: 1fr; }
+    .lista { columns: 1; }
+    .linha { grid-template-columns: minmax(0, 1fr) auto 40px; }
+    .linha .prazo { grid-column: 1; grid-row: 2; }
+    .linha .valor { grid-column: 2; grid-row: 1 / span 2; }
+    .linha .add { grid-column: 3; grid-row: 1 / span 2; }
+    .preco { text-align: left; }
+    .oferta { padding: 24px 20px; }
+  }
+
+  @media print {
+    .top, .montador, .add, .nav-sec { display: none !important; }
+    .app.show { display: block; padding: 0; }
+    body { background: #fff; }
+    .oferta { background: #fff; border: 1px solid var(--line); break-inside: avoid; }
+    section { padding-top: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M23.78 8.22 A11 11 0 1 0 23.78 23.78" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+      <circle cx="17.5" cy="16" r="3.2" fill="#c54a1a"/>
+    </svg>
+    <span>Crivo<em>&</em>Co.</span>
+  </div>
+  <span class="top-tag">Catálogo interno · uso da equipe</span>
+  <div class="top-actions" id="topActions" hidden>
+    <button class="btn-ghost" onclick="window.print()">Imprimir</button>
+    <button class="btn-ghost" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<main>
+  <div class="login" id="login">
+    <form class="login-card" onsubmit="entrar(event)">
+      <h1>Catálogo <em>interno.</em></h1>
+      <p>Planos, projetos e tabela de avulsos com os valores que usamos nas propostas.</p>
+      <label class="field-label" for="senha">Senha de acesso</label>
+      <input class="field" type="password" id="senha" autocomplete="current-password" required>
+      <button class="btn-primary" id="entrarBtn" type="submit">Abrir catálogo</button>
+      <div class="erro" id="erro" role="alert"></div>
+    </form>
+  </div>
+
+  <div class="app" id="app">
+    <div id="conteudo"></div>
+    <aside class="montador" aria-label="Montador de proposta">
+      <h2>Montar proposta</h2>
+      <p>Adicione itens do catálogo para somar entrada e mensalidade.</p>
+      <input class="cliente" id="cliente" placeholder="Nome do cliente (opcional)" oninput="renderMontador()">
+      <ul class="itens" id="itens"></ul>
+      <label class="urgencia"><input type="checkbox" id="urgencia" onchange="renderMontador()"> Prazo apertado (+30% nos avulsos)</label>
+      <div class="totais">
+        <div class="tot"><span>Entrada · única vez</span><b class="num" id="totEntrada">R$ 0</b></div>
+        <div class="tot"><span>Recorrente · por mês</span><b class="num" id="totMensal">R$ 0</b></div>
+      </div>
+      <div class="m-acoes">
+        <button class="copiar" onclick="copiarResumo()">Copiar resumo</button>
+        <button class="limpar" onclick="limpar()">Limpar</button>
+      </div>
+      <div class="feito" id="feito" role="status"></div>
+    </aside>
+  </div>
+</main>
+
+<script>
+  const API_BASE = 'https://crivo.crivo-worker.workers.dev';
+
+  let catalogo = null;
+  // id -> { nome, preco, mensal, avulso, qtd }
+  const selecao = new Map();
+  const itensPorId = new Map();
+
+  const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+  async function entrar(e) {
+    e.preventDefault();
+    const btn = document.getElementById('entrarBtn');
+    const erro = document.getElementById('erro');
+    erro.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Abrindo...';
+    try {
+      const res = await fetch(`${API_BASE}/api/catalogo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: document.getElementById('senha').value }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.ok) throw new Error(body.error || 'Não foi possível abrir o catálogo.');
+      catalogo = body.catalogo;
+      document.getElementById('senha').value = '';
+      mostrarCatalogo();
+    } catch (err) {
+      erro.textContent = err instanceof TypeError
+        ? 'Servidor indisponível agora. Tenta de novo em instantes.'
+        : err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Abrir catálogo';
+    }
+  }
+
+  function sair() {
+    catalogo = null;
+    selecao.clear();
+    document.getElementById('conteudo').innerHTML = '';
+    document.getElementById('app').classList.remove('show');
+    document.getElementById('topActions').hidden = true;
+    document.getElementById('login').style.display = '';
+  }
+
+  function botaoAdd(id, rotulo) {
+    return `<button class="add" data-id="${esc(id)}" aria-pressed="false" aria-label="Adicionar ${esc(rotulo)} à proposta" onclick="alternar('${esc(id)}')">+</button>`;
+  }
+
+  function blocoOferta(o, mensal) {
+    itensPorId.set(o.id, { nome: o.nome, preco: o.preco, mensal, avulso: false });
+    const inclusos = o.inclusos.length && typeof o.inclusos[0] === 'object'
+      ? `<div class="inclusos">${o.inclusos.map((i) => `<div><strong>${esc(i.titulo)}</strong>${esc(i.texto)}</div>`).join('')}</div>`
+      : `<ul class="lista">${o.inclusos.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
+    return `
+      <article class="oferta">
+        <div class="oferta-head">
+          <div><div class="oferta-sub">${esc(o.subtitulo)}</div><h3>${esc(o.nome)}</h3></div>
+          <div class="preco"><b class="num">${brl(o.preco)}</b><small>${mensal ? 'por mês' : 'única vez'}</small></div>
+        </div>
+        <p class="oferta-resumo">${esc(o.resumo)}</p>
+        ${o.destaques ? `<div class="chips">${o.destaques.map((d) => `<span class="chip">${esc(d)}</span>`).join('')}</div>` : ''}
+        ${inclusos}
+        ${o.prazo ? `<p class="nota"><b>Prazo.</b> ${esc(o.prazo)}</p>` : ''}
+        ${o.naoInclui ? `<p class="nota"><b>Não inclui.</b> ${esc(o.naoInclui)}</p>` : ''}
+        <button class="add" data-id="${esc(o.id)}" aria-pressed="false" onclick="alternar('${esc(o.id)}')">Adicionar à proposta</button>
+      </article>`;
+  }
+
+  function mostrarCatalogo() {
+    const c = catalogo;
+    itensPorId.clear();
+    const avulsos = c.avulsos.map((g) => `
+      <div class="grupo">
+        <h3>${esc(g.grupo)}</h3>
+        ${g.itens.map((i) => {
+          if (i.preco != null) itensPorId.set(i.id, { nome: i.nome, preco: i.preco, mensal: !!i.mensal, avulso: true });
+          return `
+            <div class="linha">
+              <span>${esc(i.nome)}</span>
+              <span class="prazo">${esc(i.prazo)}</span>
+              <span class="valor num">${i.preco != null ? brl(i.preco) + (i.mensal ? '/mês' : '') : esc(i.precoTexto)}</span>
+              ${i.preco != null ? botaoAdd(i.id, i.nome) : '<span></span>'}
+            </div>`;
+        }).join('')}
+      </div>`).join('');
+
+    const atualizado = c.atualizado_em ? new Date(c.atualizado_em.replace(' ', 'T') + 'Z').toLocaleDateString('pt-BR') : '';
+
+    document.getElementById('conteudo').innerHTML = `
+      <div class="intro">
+        <h1>O que vendemos,<br>e por <em>quanto.</em></h1>
+        <p>Versão ${esc(c.versao)}${atualizado ? ' · atualizado em ' + atualizado : ''} · base: ${esc(c.fonte)}</p>
+        <nav class="nav-sec">
+          <a href="#planos">Planos</a><a href="#projetos">Projetos</a><a href="#avulsos">Avulsos</a>
+          <a href="#orcamento">Sob orçamento</a><a href="#cortesias">Cortesias</a><a href="#condicoes">Condições</a>
+        </nav>
+      </div>
+
+      <section id="planos">
+        <div class="sec-label"><span>01</span>Planos mensais</div>
+        ${c.planos.map((p) => blocoOferta(p, true)).join('')}
+      </section>
+
+      <section id="projetos">
+        <div class="sec-label"><span>02</span>Projetos</div>
+        ${c.projetos.map((p) => blocoOferta(p, false)).join('')}
+      </section>
+
+      <section id="avulsos">
+        <div class="sec-label"><span>03</span>Serviços avulsos</div>
+        <h2 class="sec-title">Valores fixos, sem surpresa.</h2>
+        ${avulsos}
+      </section>
+
+      <section id="orcamento">
+        <div class="sec-label"><span>04</span>Sob orçamento</div>
+        ${c.sobOrcamento.map((s) => `<div class="bloco"><strong>${esc(s.nome)}</strong><p>${esc(s.texto)}</p></div>`).join('')}
+        ${c.metodo.map((s) => `<div class="bloco"><strong>${esc(s.titulo)}</strong><p>${esc(s.texto)}</p></div>`).join('')}
+      </section>
+
+      <section id="cortesias">
+        <div class="sec-label"><span>05</span>Cortesias de fechamento</div>
+        <p class="oferta-resumo">${esc(c.cortesias.texto)}</p>
+        ${c.cortesias.itens.map((i) => `<div class="linha"><span>${esc(i.nome)}</span><span class="prazo">valor de referência</span><span class="valor num">${brl(i.valor)}</span><span></span></div>`).join('')}
+        <div class="linha"><span><strong>Valor agregado</strong></span><span></span><span class="valor num">${brl(c.cortesias.itens.reduce((s, i) => s + i.valor, 0))}</span><span></span></div>
+      </section>
+
+      <section id="condicoes">
+        <div class="sec-label"><span>06</span>Condições</div>
+        <ul class="condicoes">${c.condicoes.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+      </section>`;
+
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    document.getElementById('topActions').hidden = false;
+    renderMontador();
+  }
+
+  function alternar(id) {
+    if (selecao.has(id)) selecao.delete(id);
+    else selecao.set(id, { ...itensPorId.get(id), qtd: 1 });
+    renderMontador();
+  }
+
+  function mudarQtd(id, delta) {
+    const item = selecao.get(id);
+    if (!item) return;
+    item.qtd = Math.max(1, item.qtd + delta);
+    renderMontador();
+  }
+
+  function limpar() {
+    selecao.clear();
+    document.getElementById('urgencia').checked = false;
+    renderMontador();
+  }
+
+  function calcular() {
+    const urgente = document.getElementById('urgencia').checked;
+    let entrada = 0, mensal = 0;
+    const linhas = [];
+    for (const [id, i] of selecao) {
+      const fator = urgente && i.avulso && !i.mensal ? 1.3 : 1;
+      const sub = Math.round(i.preco * i.qtd * fator);
+      if (i.mensal) mensal += sub; else entrada += sub;
+      linhas.push({ id, ...i, sub });
+    }
+    return { entrada, mensal, linhas, urgente };
+  }
+
+  function renderMontador() {
+    const { entrada, mensal, linhas } = calcular();
+    const lista = document.getElementById('itens');
+    lista.innerHTML = linhas.length
+      ? linhas.map((l) => `
+          <li>
+            <span>${esc(l.nome)}</span>
+            <span class="sub num">${brl(l.sub)}${l.mensal ? '/mês' : ''}</span>
+            <span class="qtd">
+              <button type="button" onclick="mudarQtd('${esc(l.id)}', -1)" aria-label="Diminuir">−</button>
+              <span class="num">${l.qtd}×</span>
+              <button type="button" onclick="mudarQtd('${esc(l.id)}', 1)" aria-label="Aumentar">+</button>
+            </span>
+          </li>`).join('')
+      : '<li class="vazio">Nenhum item ainda. Use os botões + do catálogo.</li>';
+    document.getElementById('totEntrada').textContent = brl(entrada);
+    document.getElementById('totMensal').textContent = brl(mensal);
+    document.querySelectorAll('.add[data-id]').forEach((b) => {
+      const on = selecao.has(b.dataset.id);
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+      if (b.textContent.length > 2) b.textContent = on ? 'Na proposta ✓' : 'Adicionar à proposta';
+      else b.textContent = on ? '✓' : '+';
+    });
+  }
+
+  async function copiarResumo() {
+    const { entrada, mensal, linhas, urgente } = calcular();
+    const feito = document.getElementById('feito');
+    if (!linhas.length) { feito.textContent = 'Adicione pelo menos um item.'; return; }
+    const cliente = document.getElementById('cliente').value.trim();
+    const texto = [
+      `Proposta Crivo & Co.${cliente ? ' para ' + cliente : ''}`,
+      '',
+      ...linhas.map((l) => `• ${l.qtd > 1 ? l.qtd + '× ' : ''}${l.nome}: ${brl(l.sub)}${l.mensal ? '/mês' : ''}`),
+      '',
+      entrada ? `Entrada (única vez): ${brl(entrada)}` : null,
+      mensal ? `Recorrente: ${brl(mensal)}/mês` : null,
+      urgente ? 'Inclui acréscimo de 30% por prazo apertado nos avulsos.' : null,
+      'Proposta válida por 15 dias.',
+    ].filter((l) => l !== null).join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+      feito.textContent = 'Resumo copiado.';
+    } catch {
+      feito.textContent = 'Não deu para copiar automaticamente neste navegador.';
+    }
+  }
+</script>
+</body>
+</html>

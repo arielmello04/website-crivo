@@ -9,7 +9,7 @@
 
 import { mkdirSync, copyFileSync, rmSync, existsSync, writeFileSync, readdirSync } from 'fs';
 
-const PUBLICOS = ['index.html', 'interno.html', 'questionario.html'];
+const PUBLICOS = ['index.html', 'interno.html', 'questionario.html', 'catalogo.html'];
 const DIST = 'worker/dist';
 
 // Esvazia o conteúdo em vez de remover a pasta. No Windows, um `wrangler dev`

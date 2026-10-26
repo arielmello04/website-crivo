@@ -24,3 +24,7 @@ worker/dist/
 worker/node_modules/
 worker/.wrangler/
 worker/.dev.vars
+
+# catálogo interno com preços: o repositório é público, então fica só local e no D1
+worker/catalogo.json
+worker/.catalogo.sql

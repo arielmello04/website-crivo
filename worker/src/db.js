@@ -35,3 +35,9 @@ export async function listBriefings(db, { limit = 20, offset = 0 } = {}) {
 export async function getBriefing(db, id) {
   return db.prepare(`SELECT * FROM briefings WHERE id = ?`).bind(id).first();
 }
+
+export async function getCatalogo(db) {
+  const linha = await db.prepare(`SELECT dados, atualizado_em FROM catalogo WHERE id = 1`).first();
+  if (!linha) return null;
+  return { ...JSON.parse(linha.dados), atualizado_em: linha.atualizado_em };
+}

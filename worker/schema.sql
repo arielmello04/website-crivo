@@ -28,3 +28,12 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rate_limits_janela ON rate_limits(janela_em);
+
+-- Catálogo interno de serviços e preços. Fica no banco, e não no código,
+-- porque o repositório é público: um único documento JSON, lido só pela rota
+-- protegida /api/catalogo. O conteúdo é carregado com `wrangler d1 execute`.
+CREATE TABLE IF NOT EXISTS catalogo (
+  id            INTEGER PRIMARY KEY CHECK (id = 1),
+  dados         TEXT NOT NULL,
+  atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);

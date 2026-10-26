@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-import { insertBriefing, listBriefings, getBriefing } from './db.js';
+import { insertBriefing, listBriefings, getBriefing, getCatalogo } from './db.js';
 import { briefingSchema } from './validation.js';
 import { notifyNewBriefing, notifyQuestionario } from './mailer.js';
 import { createToken, validateToken } from './tokens.js';
@@ -13,6 +13,8 @@ const LIMITES = {
   briefing:    { janelaMs: 15 * MIN, max: 5 },
   token:       { janelaMs: 60 * MIN, max: 30 },
   questionario:{ janelaMs: 15 * MIN, max: 5 },
+  // conta toda tentativa, certa ou errada: segura chute de senha
+  catalogo:    { janelaMs: 15 * MIN, max: 10 },
 };
 
 // ============ MIDDLEWARES ============
@@ -237,6 +239,27 @@ app.post('/api/questionario', async (c) => {
   );
 
   return c.json({ ok: true });
+});
+
+// === POST /api/catalogo — catálogo interno de serviços e preços (admin) ===
+// POST, e não GET, para a senha ir no corpo e não ficar em log de URL.
+app.post('/api/catalogo', async (c) => {
+  const bloqueio = await limitar(c, 'catalogo');
+  if (bloqueio) return bloqueio;
+
+  const { body, erro } = await lerJson(c);
+  if (erro) return c.json({ ok: false, error: erro }, 400);
+
+  const adminSecret = c.env.ADMIN_SECRET;
+  if (!adminSecret || body?.adminKey !== adminSecret) {
+    return c.json({ ok: false, error: 'Senha incorreta.' }, 401);
+  }
+
+  const catalogo = await getCatalogo(c.env.DB);
+  if (!catalogo) return c.json({ ok: false, error: 'Catálogo ainda não carregado.' }, 404);
+
+  c.header('Cache-Control', 'no-store');
+  return c.json({ ok: true, catalogo });
 });
 
 // 404. Chamada de API responde JSON, como antes. Já um caminho de página que
